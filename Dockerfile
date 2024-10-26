@@ -19,7 +19,7 @@ RUN \
 FROM base AS builder
 WORKDIR /postcard
 COPY --from=deps /postcard/node_modules ./node_modules
-COPY . .
+COPY /postcard/package-lock.json* ./
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
