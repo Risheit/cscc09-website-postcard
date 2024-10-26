@@ -8,11 +8,9 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /postcard
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY /postcard/package.json /postcard/package-lock.json* ./
 RUN \
-    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm ci; \
-    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+    if [ -f /postcard/package-lock.json ]; then npm ci; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
@@ -29,9 +27,7 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN \
-    if [ -f yarn.lock ]; then yarn run build; \
-    elif [ -f package-lock.json ]; then npm run build; \
-    elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+    if [ -f /postcard/package-lock.json ]; then npm run build; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
