@@ -10,7 +10,7 @@ WORKDIR /postcard
 # Install dependencies based on the preferred package manager
 COPY /postcard/package.json /postcard/package-lock.json* ./
 RUN \
-    if [ -f /postcard/package-lock.json ]; then npm ci; \
+    if [ -f package-lock.json ]; then npm ci; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
@@ -27,7 +27,7 @@ COPY . .
 # ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN \
-    if [ -f /postcard/package-lock.json ]; then npm run build; \
+    if [ -f package-lock.json ]; then npm run build; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
