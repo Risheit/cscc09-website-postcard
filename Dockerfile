@@ -19,7 +19,7 @@ RUN \
 FROM base AS builder
 WORKDIR /postcard
 COPY --from=deps /postcard/node_modules ./node_modules
-COPY /postcard/package-lock.json* ./
+COPY /postcard/package.json /postcard/package-lock.json* ./
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -27,7 +27,7 @@ COPY /postcard/package-lock.json* ./
 # ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN \
-    if [ -f package-lock.json ]; then npm run build; \
+    if [ -f package.json ]; then npm run build; \
     else echo "Lockfile not found." && exit 1; \
     fi
 
