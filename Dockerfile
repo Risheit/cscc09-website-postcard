@@ -8,7 +8,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /postcard
 
 # Install dependencies based on the preferred package manager
-COPY /postcard/package.json /postcard/package-lock.json* ./
+COPY package.json package-lock.json* ./
 RUN \
     if [ -f package-lock.json ]; then npm ci; \
     else echo "Lockfile not found." && exit 1; \
@@ -18,7 +18,7 @@ RUN \
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /postcard
-COPY --from=deps /postcard/node_modules ./node_modules
+COPY --from=deps node_modules ./node_modules
 COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
