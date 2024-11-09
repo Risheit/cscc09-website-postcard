@@ -1,8 +1,8 @@
 "use client";
 import dynamic from "next/dynamic";
 
-const SimpleCanvas = dynamic(
-  () => import("./components/SimpleCanvas/SimpleCanvas"),
+const SimpleCanvasV2 = dynamic(
+  () => import("./components/SimpleCanvasV2/SimpleCanvasV2"),
   {
     ssr: false,
   }
@@ -11,7 +11,7 @@ const SimpleCanvas = dynamic(
 export default function Page() {
   return (
     <>
-      <SimpleCanvas />
+      <SimpleCanvasV2 />
     </>
   );
 }

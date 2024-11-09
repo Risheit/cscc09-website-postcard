@@ -1,0 +1,22 @@
+.konvajs-content {
+  background-color: white;
+
+  /* set background image */
+  /* background-image: url(""); */
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#circularcursor {
+  background-color: transparent;
+  border: 1px solid white;
+  border-radius: 50%;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  position: absolute;
+  z-index: 2;
+
+  pointer-events: none;
+}
