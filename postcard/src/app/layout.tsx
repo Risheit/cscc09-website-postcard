@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { Lexend } from "next/font/google";
+const lexend = Lexend({ subsets: ["latin"] });
+
 // fontawesome
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -18,9 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={lexend.className}>
         <div className="min-h-[100vh] flex flex-col">
-          <header className="h-12 flex place-items-center border-b p-2">
+          <header className="h-12 flex place-items-center border-b border-background-300 p-2">
             Header
           </header>
 
@@ -33,7 +36,7 @@ export default function RootLayout({
 
           <div className="flex-grow"></div>
 
-          <footer className="h-12 flex place-items-center border-t p-2">
+          <footer className="h-12 flex place-items-center border-t border-background-300 p-2">
             Footer
           </footer>
         </div>

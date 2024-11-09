@@ -1,17 +1,3 @@
-"use client";
-import dynamic from "next/dynamic";
-
-const SimpleCanvasV2 = dynamic(
-  () => import("./components/SimpleCanvasV2/SimpleCanvasV2"),
-  {
-    ssr: false,
-  }
-);
-
 export default function Page() {
-  return (
-    <>
-      <SimpleCanvasV2 />
-    </>
-  );
+  return <>Hello world! This is the landing page for un-authenticated users.</>;
 }
