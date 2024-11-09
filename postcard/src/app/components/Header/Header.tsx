@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   faMapLocationDot,
   faUserCircle,
@@ -8,12 +9,12 @@ export default function Header() {
   return (
     <header className="h-12 flex place-items-center border-b border-background-300 shadow-md shadow-background-100 p-2">
       {/* click route to /dashboard or / */}
-      <span className="h-full flex place-items-center">
+      <Link href="/" className="h-full flex place-items-center">
         <span className="aspect-square h-full flex items-center justify-center rounded-full bg-primary-500">
           <FontAwesomeIcon icon={faMapLocationDot} className="text-white" />
         </span>
         <span className="pl-2">postcard.</span>
-      </span>
+      </Link>
 
       <span className="flex-grow"></span>
 
@@ -26,7 +27,7 @@ export default function Header() {
       </span> */}
 
       {/* if logged in, click route to /account */}
-      <span className="flex gap-4 place-items-center pr-2">
+      <Link href="/account" className="flex gap-4 place-items-center pr-2">
         <span className="h-full flex place-items-center">
           <span className="aspect-square h-full flex items-center justify-center rounded-full overflow-hidden">
             <FontAwesomeIcon icon={faUserCircle} className="text-text-900" />
@@ -36,7 +37,7 @@ export default function Header() {
         <button className="bg-secondary-100 px-4 border-background-300">
           log out
         </button>
-      </span>
+      </Link>
     </header>
   );
 }
