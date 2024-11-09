@@ -9,6 +9,9 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
 
+import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer";
+
 export const metadata: Metadata = {
   title: "Postcard",
   description: "",
@@ -23,23 +26,18 @@ export default function RootLayout({
     <html lang="en">
       <body className={lexend.className}>
         <div className="min-h-[100vh] flex flex-col">
-          <header className="h-12 flex place-items-center border-b border-background-300 p-2">
-            Header
-          </header>
+          <Header />
 
           <div
             id="content"
-            className="flex place-items-center justify-center p-2"
+            className="container flex place-self-center justify-center"
           >
             {children}
           </div>
 
           <div className="flex-grow"></div>
-
-          <footer className="h-12 flex place-items-center border-t border-background-300 p-2">
-            Footer
-          </footer>
         </div>
+        <Footer />
       </body>
     </html>
   );
