@@ -5,10 +5,10 @@ import { basename } from "path";
 const bucketPath = process.env.UPLOADS_PATH || '/usr/share/uploads';
 const imagePath = `${bucketPath}/images`;
 
-interface UploadedFile {
+type UploadedFile = {
     file: File;
     owner: number;
-}
+};
 
 async function ifImageExists(id: string) {
     const files = await readdir(imagePath);
