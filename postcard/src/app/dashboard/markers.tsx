@@ -3,6 +3,8 @@ import { AdvancedMarker, Pin, useMap } from "@vis.gl/react-google-maps";
 import { Marker, MarkerClusterer } from "@googlemaps/markerclusterer";
 
 export type Poi = { key: string; location: google.maps.LatLngLiteral };
+
+// TODO: replace with real data
 export const locations: Poi[] = [
   { key: "operaHouse", location: { lat: -33.8567844, lng: 151.213108 } },
   { key: "tarongaZoo", location: { lat: -33.8472767, lng: 151.2188164 } },
@@ -26,6 +28,7 @@ export const PoiMarkers = (props: { pois: Poi[] }) => {
   const [markers, setMarkers] = useState<{ [key: string]: Marker }>({});
   const clusterer = useRef<MarkerClusterer | null>(null);
 
+  // initialize clusterer
   useEffect(() => {
     if (!map) return;
     if (!clusterer.current) {
@@ -33,6 +36,7 @@ export const PoiMarkers = (props: { pois: Poi[] }) => {
     }
   }, [map]);
 
+  // update markers when pois change
   useEffect(() => {
     clusterer.current?.clearMarkers();
     clusterer.current?.addMarkers(Object.values(markers));
@@ -53,6 +57,8 @@ export const PoiMarkers = (props: { pois: Poi[] }) => {
     });
   };
 
+  // pan to marker on click
+  // TODO: pull up post details linked to marker
   const handleClick = useCallback(
     (ev: google.maps.MapMouseEvent) => {
       if (!map) return;

@@ -6,97 +6,20 @@ import {
   APIProvider,
   Map,
   MapCameraChangedEvent,
-  useMap,
 } from "@vis.gl/react-google-maps";
-import { locations, PoiMarkers } from "./markers";
-import Dashboard, { Post } from "../components/Dashboard/Dashboard";
 
-const examplePosts: Post[] = [
-  {
-    id: 1,
-    username: "user1",
-    userid: 2,
-    title: "Hello, world!",
-    type: "postcard",
-    // to an image,
-    url: "https://picsum.photos/536/354",
-    text: "Hello, world!",
-    location: { name: "Sydney Opera House", lat: -33.8567844, lng: 151.213108 },
-  },
-  {
-    id: 2,
-    username: "user1",
-    userid: 2,
-    title: "Hello again, world!",
-    type: "text",
-    text: "Hello, hello!",
-    location: {
-      name: "",
-      lat: 43.6426,
-      lng: 79.3871,
-    },
-  },
-  {
-    id: 3,
-    username: "user1",
-    userid: 2,
-    title: "Hello, world!",
-    type: "postcard",
-    url: "https://picsum.photos/536/354",
-    location: {
-      name: "",
-      lat: 43.6426,
-      lng: 79.3871,
-    },
-  },
-  {
-    id: 4,
-    username: "user1",
-    userid: 2,
-    title: "Hello again, world!",
-    type: "text",
-    text: "Hello, hello!",
-    location: {
-      name: "",
-      lat: 43.6426,
-      lng: 79.3871,
-    },
-  },
-  {
-    id: 5,
-    username: "user1",
-    userid: 2,
-    title: "Hello, world!",
-    type: "postcard",
-    url: "https://picsum.photos/536/354",
-    location: {
-      name: "",
-      lat: 43.6426,
-      lng: 79.3871,
-    },
-  },
-  {
-    id: 6,
-    username: "user1",
-    userid: 2,
-    title: "Hello again, world!",
-    type: "text",
-    text: "Hello, hello!",
-    location: {
-      name: "",
-      lat: 43.6426,
-      lng: 79.3871,
-    },
-  },
-];
+import { locations, PoiMarkers } from "./markers";
+import Dashboard from "../components/Dashboard/Dashboard";
+
+import { Post } from "../models/post";
+import { mockPosts } from "./mockPosts";
 
 export default function Page() {
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
-  const [userLocation, setUserLocation] = useState({ lat: 0, lng: 0 });
+  const [cameraLocation, setCameraLocation] = useState({ lat: 0, lng: 0 });
 
-  const [posts, setPosts] = useState<Post[]>(examplePosts);
-
-  const map = useMap();
+  // TODO: replace with real data
+  const [posts, setPosts] = useState<Post[]>(mockPosts);
 
   useEffect(() => {
     const resizeMap = () => {
@@ -110,7 +33,7 @@ export default function Page() {
 
     // ask for user location to center map by default
     navigator.geolocation.getCurrentPosition((position) => {
-      setUserLocation({
+      setCameraLocation({
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       });
@@ -136,18 +59,13 @@ export default function Page() {
           <Map
             id="postcard-map"
             defaultZoom={
-              userLocation.lat === 0 && userLocation.lng === 0 ? 2 : 5
+              cameraLocation.lat === 0 && cameraLocation.lng === 0 ? 2 : 5
             }
-            defaultCenter={{ lat: userLocation.lat, lng: userLocation.lng }}
+            defaultCenter={{ lat: cameraLocation.lat, lng: cameraLocation.lng }}
             mapId={process.env.NEXT_PUBLIC_GMP_MAP_ID ?? ""}
-            onCameraChanged={(ev: MapCameraChangedEvent) =>
-              console.log(
-                "camera changed.",
-                ev.detail.center,
-                "zoom:",
-                ev.detail.zoom
-              )
-            }
+            onCameraChanged={(ev: MapCameraChangedEvent) => {
+              // TODO: maybe update posts based on map bounds
+            }}
             minZoom={2}
             maxZoom={20}
             disableDefaultUI={true}

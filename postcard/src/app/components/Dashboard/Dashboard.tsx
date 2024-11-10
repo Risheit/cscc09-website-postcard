@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import {
   faMapPin,
+  faUserCircle,
   faThumbsUp,
   faThumbsDown,
   faComments,
@@ -13,20 +14,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMap } from "@vis.gl/react-google-maps";
 import { useRouter } from "next/navigation";
 
-export type Post = {
-  id: number;
-  userid: number;
-  username: string;
-  title: string;
-  type: "postcard" | "text";
-  url?: string;
-  text?: string;
-  location: {
-    name: string;
-    lat: number;
-    lng: number;
-  };
-};
+import { Post } from "@/app/models/post";
+
 export default function Dashboard(props: { posts: any }) {
   const { posts }: { posts: Post[] } = props;
   const map = useMap("postcard-map");
@@ -50,11 +39,15 @@ export default function Dashboard(props: { posts: any }) {
               href={`/user/${post.userid}`}
               className="flex place-items-center"
             >
-              <img
-                src="https://picsum.photos/32/32"
-                alt="profile"
-                className="rounded-full"
-              />
+              {post.userpfp ? (
+                <img
+                  src={post.userpfp ?? "https://picsum.photos/32/32"}
+                  alt="profile"
+                  className="rounded-full w-6"
+                />
+              ) : (
+                <span className="rounded-full h-6 w-6 bg-primary-600"></span>
+              )}
 
               <span className="text-primary-600 pl-2">{post.username}</span>
             </Link>
@@ -63,7 +56,12 @@ export default function Dashboard(props: { posts: any }) {
 
             {/* date stamp, today formatted */}
             <span className="text-sm font-light text-text-900">
-              11/09/2024, 12pm
+              {post.date.toLocaleString("en-US", {
+                year: "2-digit",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "numeric",
+              })}
             </span>
           </div>
           <div
@@ -97,7 +95,7 @@ export default function Dashboard(props: { posts: any }) {
           )}
           <Link
             href={`/post/${post.id}`}
-            className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600 "
+            className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600"
           >
             {post.text}
           </Link>
@@ -148,11 +146,17 @@ export default function Dashboard(props: { posts: any }) {
           </div>
 
           <span className="text-right text-text-400 text-xs font-light italic text-nowrap">
-            uploaded: 11/09/2024
+            posted:{" "}
+            {post.posteddate.toLocaleString("en-US", {
+              year: "2-digit",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "numeric",
+              minute: "numeric",
+            })}
           </span>
         </div>
       ))}
-      {/* <div className="h-12"></div> */}
     </div>
   );
 }
