@@ -22,7 +22,9 @@ export async function GET(req: NextRequest) {
   let query: QueryResult;
   if (!x || !y) {
     query = await pool.query(
-      `SELECT ${asReadablePostQuery} FROM posts
+      `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name,
+      users.profile_pic as poster_profile_pic
+      FROM posts JOIN users on owner = users.id
       WHERE 1=1 ${ownerCondition}
       ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint`,
       [limit, offset]
