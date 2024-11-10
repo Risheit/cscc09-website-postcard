@@ -2,7 +2,7 @@ import { Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
 import { Pool } from 'pg';
 
 function dbName() {
-  console.log('env variables', process.env);
+  console.log(JSON.stringify({ variables: process.env }));
   return process.env.DATABASE_NAME!;
 }
 
