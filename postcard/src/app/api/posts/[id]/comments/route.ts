@@ -46,9 +46,9 @@ export async function POST(
 
   const query = await pool.query(
     `INSERT INTO posts (text_content, image_content, location_name, location,
-      comment_of, owner, posted_time)
+      comment_of, owner, posted_time, num_comments)
     VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
-      $7::integer, $8::integer, $9::timestamp)
+      $7::integer, $8::integer, $9::timestamp, 0)
     RETURNING ${asReadablePostQuery}`,
     [
       title ?? null,
@@ -62,6 +62,13 @@ export async function POST(
       postedTime,
     ]
   );
+
+  if (query.rows.length !== 0) {
+    await pool.query(
+      `UPDATE posts SET num_comments = num_comments + 1 WHERE id = $1::integer`,
+      [id]
+    );
+  }
 
   return Response.json(query.rows[0], { status: 200 });
 }
