@@ -137,6 +137,8 @@
 }
 
 body {
+  overflow-x: hidden;
+
   color: var(--text-950);
   background: var(--background-50);
 
@@ -168,4 +170,17 @@ button:enabled:active {
 button:disabled {
   border: 1px solid transparent;
   color: var(--background-300);
+}
+
+/* hide scrollbar, thank you stackoverflow! https://stackoverflow.com/a/66436651 */
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

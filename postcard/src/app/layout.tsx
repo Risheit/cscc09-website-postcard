@@ -28,10 +28,7 @@ export default function RootLayout({
         <div className="min-h-[100vh] flex flex-col">
           <Header />
 
-          <div
-            id="content"
-            className="container flex place-self-center justify-center"
-          >
+          <div id="content" className="flex place-self-center justify-center">
             {children}
           </div>
 

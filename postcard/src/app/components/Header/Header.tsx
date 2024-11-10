@@ -27,17 +27,17 @@ export default function Header() {
       </span> */}
 
       {/* if logged in, click route to /account */}
-      <Link href="/account" className="flex gap-4 place-items-center pr-2">
-        <span className="h-full flex place-items-center">
+      <span className="flex gap-4 place-items-center pr-2">
+        <Link href="/account" className="h-full flex place-items-center">
           <span className="aspect-square h-full flex items-center justify-center rounded-full overflow-hidden">
             <FontAwesomeIcon icon={faUserCircle} className="text-text-900" />
           </span>
           <span className="pl-2">Hello, user</span>
-        </span>
+        </Link>
         <button className="bg-secondary-100 px-4 border-background-300">
           log out
         </button>
-      </Link>
+      </span>
     </header>
   );
 }
