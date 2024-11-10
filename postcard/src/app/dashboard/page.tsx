@@ -14,6 +14,8 @@ import Dashboard, { Post } from "../components/Dashboard/Dashboard";
 const examplePosts: Post[] = [
   {
     id: 1,
+    username: "user1",
+    userid: 2,
     title: "Hello, world!",
     type: "postcard",
     // to an image,
@@ -23,6 +25,8 @@ const examplePosts: Post[] = [
   },
   {
     id: 2,
+    username: "user1",
+    userid: 2,
     title: "Hello again, world!",
     type: "text",
     text: "Hello, hello!",
@@ -34,6 +38,8 @@ const examplePosts: Post[] = [
   },
   {
     id: 3,
+    username: "user1",
+    userid: 2,
     title: "Hello, world!",
     type: "postcard",
     url: "https://picsum.photos/536/354",
@@ -45,6 +51,8 @@ const examplePosts: Post[] = [
   },
   {
     id: 4,
+    username: "user1",
+    userid: 2,
     title: "Hello again, world!",
     type: "text",
     text: "Hello, hello!",
@@ -56,6 +64,8 @@ const examplePosts: Post[] = [
   },
   {
     id: 5,
+    username: "user1",
+    userid: 2,
     title: "Hello, world!",
     type: "postcard",
     url: "https://picsum.photos/536/354",
@@ -67,6 +77,8 @@ const examplePosts: Post[] = [
   },
   {
     id: 6,
+    username: "user1",
+    userid: 2,
     title: "Hello again, world!",
     type: "text",
     text: "Hello, hello!",

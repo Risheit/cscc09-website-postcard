@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 
 export type Post = {
   id: number;
+  userid: number;
+  username: string;
   title: string;
   type: "postcard" | "text";
   url?: string;
@@ -38,20 +40,24 @@ export default function Dashboard(props: { posts: any }) {
       style={{ width: "30%", height: "calc(100vh - 48px - 8px)" }}
     >
       {posts.map((post) => (
-        <Link
-          href={`/post/${post.id}`}
+        <div
           key={post.id}
           className="flex flex-col gap-2 bg-background-100 rounded-md shadow-md px-4 py-2"
         >
           <div className="flex place-items-center">
             {/* profile pic and name */}
-            <img
-              src="https://picsum.photos/32/32"
-              alt="profile"
-              className="rounded-full"
-            />
+            <Link
+              href={`/user/${post.userid}`}
+              className="flex place-items-center"
+            >
+              <img
+                src="https://picsum.photos/32/32"
+                alt="profile"
+                className="rounded-full"
+              />
 
-            <span className="text-primary-600 pl-2">user</span>
+              <span className="text-primary-600 pl-2">{post.username}</span>
+            </Link>
 
             <span className="flex-grow"></span>
 
@@ -61,11 +67,8 @@ export default function Dashboard(props: { posts: any }) {
             </span>
           </div>
           <div
-            className="flex place-items-center justify-between gap-2 text-text-800 text-xs font-light hover:bg-background-200 active:bg-background-300 rounded-md"
+            className="flex place-items-center justify-between gap-2 text-text-800 text-xs font-light hover:bg-background-200 active:bg-background-300 rounded-md cursor-pointer"
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-
               if (!map) return;
               map.panTo(post.location);
               map.setZoom(15);
@@ -81,35 +84,35 @@ export default function Dashboard(props: { posts: any }) {
             </span>
           </div>
           {post.type === "postcard" ? (
-            <div className="bg-slate-50 p-2 w-full rounded-sm">
+            <Link
+              href={`/post/${post.id}`}
+              className="bg-slate-50 p-2 w-full rounded-sm"
+            >
               <img src={post.url} alt={post.title} className="shadow-sm mb-2" />
 
               <span className="h-4 bg-slate-50 text-black">{post.title}</span>
-            </div>
+            </Link>
           ) : (
             <></>
           )}
-          <span className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600 ">
+          <Link
+            href={`/post/${post.id}`}
+            className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600 "
+          >
             {post.text}
-          </span>
+          </Link>
 
           <div className="flex place-items-center gap-2">
             <button
               className="text-primary-500 inline whitespace-nowrap"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
+              onClick={(e) => {}}
             >
               4
               <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
+              onClick={(e) => {}}
             >
               2
               <FontAwesomeIcon icon={faThumbsDown} className="pl-1" />
@@ -117,8 +120,7 @@ export default function Dashboard(props: { posts: any }) {
             <button
               className="text-primary-500 inline whitespace-nowrap"
               onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+                router.push(`/post/${post.id}`);
               }}
             >
               3
@@ -130,8 +132,6 @@ export default function Dashboard(props: { posts: any }) {
             <button
               className="text-primary-500"
               onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
                 router.push(`/post/${post.id}/remix`);
               }}
             >
@@ -140,9 +140,6 @@ export default function Dashboard(props: { posts: any }) {
             <button
               className="text-primary-500"
               onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
                 // TODO: copy post url to clipboard
               }}
             >
@@ -153,7 +150,7 @@ export default function Dashboard(props: { posts: any }) {
           <span className="text-right text-text-400 text-xs font-light italic text-nowrap">
             uploaded: 11/09/2024
           </span>
-        </Link>
+        </div>
       ))}
       {/* <div className="h-12"></div> */}
     </div>
