@@ -49,20 +49,28 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Unauthorized' }, { status: 405 });
   }
 
-  const { textContent, imagePath, lat, lng } = await req.json();
+  const { textContent, imagePath, locationName, lat, lng, postedTime } =
+    await req.json();
 
-  if (lat === undefined || lng === undefined) {
-    return Response.json(
-      { error: 'Missing lat and lng fields' },
-      { status: 400 }
-    );
+  if (!lat || !lng || !postedTime || !locationName) {
+    return Response.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   const query = await pool.query(
-    `INSERT INTO posts (text_content, image_content, location, owner)
-    VALUES ($1::text, $2::text, ST_MakePoint($3::decimal,$4::decimal), $5::integer)
+    `INSERT INTO posts (text_content, image_content, location_name, location,
+      owner, posted_time)
+    VALUES ($1::text, $2::text, $3::text, ST_MakePoint($4::decimal,$5::decimal),
+      $6::integer, $7::timestamp)
     RETURNING ${asReadablePostQuery}`,
-    [textContent ?? null, imagePath ?? null, lng, lat, session.account?.userId]
+    [
+      textContent ?? null,
+      imagePath ?? null,
+      locationName,
+      lng,
+      lat,
+      session.account?.userId,
+      postedTime,
+    ]
   );
 
   return Response.json(query.rows[0], { status: 200 });
