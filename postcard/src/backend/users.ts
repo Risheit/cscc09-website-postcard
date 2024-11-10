@@ -1,12 +1,12 @@
 import pool from '@/backend/cloudsql';
 
-type User = {
+export type User = {
   id: number;
   displayName: string;
   profilePicturePath: string | undefined;
 };
 
-type Account = {
+export type Account = {
   username: string;
   credentials?: string | undefined;
   isOAuth: boolean;
@@ -31,7 +31,6 @@ function fromRawAccount(accountRaw?: {
   is_oauth: boolean;
   user_id: number;
 }) {
-  console.log('accountRaw', accountRaw);
   return accountRaw ? {
     username: accountRaw?.username,
     credentials: accountRaw?.credentials,

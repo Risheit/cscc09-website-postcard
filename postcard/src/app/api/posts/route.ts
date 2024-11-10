@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
 
   const owner = ownerName ? await getUserByUsername(ownerName) : undefined;
   const ownerCondition = owner ? `AND owner = $6::integer` : '';
+  console.log('ownerCondition', ownerCondition, owner);
 
   let query: QueryResult;
   if (!x || !y) {

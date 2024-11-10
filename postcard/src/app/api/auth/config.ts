@@ -4,13 +4,8 @@ import type {
   NextApiRequest,
   NextApiResponse,
 } from 'next';
-import { getServerSession, NextAuthOptions } from 'next-auth';
-import { signIn } from 'next-auth/react';
-import {
-  addUser,
-  attachAccountToUser,
-  getAccountByUsername,
-} from '@/backend/users';
+import { getServerSession, NextAuthOptions, Session } from 'next-auth';
+import { getAccountByUsername, getUserById, User } from '@/backend/users';
 
 // See: https://next-auth.js.org/configuration/nextjs#getserversession
 export function authorizeSession(
@@ -21,6 +16,11 @@ export function authorizeSession(
 ) {
   return getServerSession(...args, config);
 }
+
+export interface DBSession extends Session {
+  account?: User;
+}
+
 export const config = {
   providers: [
     GithubProvider({
@@ -29,23 +29,25 @@ export const config = {
     }),
   ],
   callbacks: {
-    signIn: async ({ user, account, profile, email, credentials }) => {
+    signIn: async ({ user, account }) => {
       if (account?.provider === 'github') {
         const connectedAccount = await getAccountByUsername(user.id);
-        console.log('connectedAccount', connectedAccount);
         if (!connectedAccount) {
           const encodedName = encodeURIComponent(user.name ?? '');
           return `/account/oauth/create?name=${encodedName}&user=${user.id}`;
         }
-
-        return true;
       }
 
       return true;
     },
 
-    session: async ({ session, token, user }) => {
-      return session;
+    session: async ({ session, token }) => {
+      if (token?.sub === undefined) {
+        return session;
+      }
+
+      const account = await getAccountByUsername(token.sub);
+      return { ...session, account } as DBSession;
     },
   },
 } as NextAuthOptions;
