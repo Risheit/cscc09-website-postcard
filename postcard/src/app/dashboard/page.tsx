@@ -13,15 +13,13 @@ import Dashboard from "../components/Dashboard/Dashboard";
 import LocateMe from "../components/Dashboard/LocateMe/LocateMe";
 
 import { Post } from "../models/post";
-import { mockPosts } from "./mockPosts";
 
 export default function Page() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
   const [cameraLocation, setCameraLocation] = useState({ lat: 0, lng: 0 });
 
-  // TODO: replace with real data
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     fetch("/api/posts").then(async (res) => {

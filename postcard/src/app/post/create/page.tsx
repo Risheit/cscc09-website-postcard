@@ -14,6 +14,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { PoiMarker } from "./marker";
 import CreatePostForm from "@/app/components/CreatePostForm/CreatePostForm";
+import { useRouter } from "next/navigation";
 
 const SimpleCanvasV2 = dynamic(
   () => import("@/app/components/SimpleCanvasV2/SimpleCanvasV2"),
@@ -23,6 +24,7 @@ const SimpleCanvasV2 = dynamic(
 );
 
 export default function Page() {
+  const router = useRouter();
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isImagePost, setIsImagePost] = useState(true);
   const [cameraLocation, setCameraLocation] = useState({ lat: 0, lng: 0 });
@@ -35,10 +37,10 @@ export default function Page() {
   const [file, setFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
-    location: "",
+    locationName: "",
     title: "",
-    text: "",
-    date: "",
+    textContent: "",
+    postedTime: "",
   });
 
   const CREATE_POST_MAP_ID = "create-post-map";
@@ -62,6 +64,32 @@ export default function Page() {
       });
     }
   }, []);
+
+  const submitPost = () => {
+    console.log("submitting post...");
+    console.log(formData);
+
+    const data = JSON.stringify({
+      locationName: formData.locationName,
+      title: formData.title,
+      textContent: formData.textContent,
+      postedTime: formData.postedTime,
+      lat: poi.location.lat.toFixed(5),
+      lng: poi.location.lng.toFixed(5),
+    });
+
+    console.log("Data to be sent: ", data);
+
+    fetch("/api/posts", {
+      method: "POST",
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Post submitted: ", data);
+        router.push("/dashboard");
+      });
+  };
 
   return (
     <div className="flex flex-col gap-2 mt-4 w-full max-w-[800px] px-4">
@@ -217,10 +245,10 @@ export default function Page() {
           onClick={() => {
             setFile(null);
             setFormData({
-              location: "",
+              locationName: "",
               title: "",
-              text: "",
-              date: "",
+              textContent: "",
+              postedTime: "",
             });
 
             setSecondStep(false);
@@ -231,11 +259,12 @@ export default function Page() {
         <button
           className="p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
           disabled={
-            formData.location === "" ||
+            formData.locationName === "" ||
             formData.title === "" ||
-            formData.text === "" ||
-            formData.date === ""
+            formData.textContent === "" ||
+            formData.postedTime === ""
           }
+          onClick={submitPost}
         >
           post!
         </button>

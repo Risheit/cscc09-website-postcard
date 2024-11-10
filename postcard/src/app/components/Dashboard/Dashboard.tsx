@@ -73,13 +73,18 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
               map.setZoom(15);
             }}
           >
-            <span>
+            <span className="flex-grow whitespace-nowrap">
               <FontAwesomeIcon icon={faMapPin} className="pr-1" />
               {post.location_name ? post.location_name : "Unnamed location"}
             </span>
-            <span>
-              {post.lat}° {post.lat > 0 ? "N" : "S"}, {post.lng}°{" "}
-              {post.lng > 0 ? "W" : "E"}
+            <span className="text-right flex-grow">
+              <span className="whitespace-nowrap">
+                {post.lat.toFixed(6)}° {post.lat > 0 ? "N" : "S"}
+                {", "}
+              </span>
+              <span className="whitespace-nowrap">
+                {post.lng.toFixed(6)}° {post.lng > 0 ? "W" : "E"}
+              </span>
             </span>
           </div>
           {post.image_content ? (
@@ -89,7 +94,7 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
             >
               {/* TODO: get images to work */}
               <img
-                src={post.image_url}
+                src={post.image_content}
                 alt={post.title}
                 className="shadow-sm mb-2"
               />
