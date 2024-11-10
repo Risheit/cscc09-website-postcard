@@ -20,24 +20,25 @@ type Tool = "brush" | "eraser";
 type Line = { tool: Tool; size: number; colour: Colour; points: number[] };
 type Colour = string; // hex, e.g. "#000000"
 
-export default function SimpleCanvasV2() {
+export default function SimpleCanvasV2(props: { file: any; setFile: any }) {
+  const { file, setFile } = props;
   const [tool, setTool] = useState<Tool>("brush");
   const [lines, setLines] = useState<Line[]>([]);
   const [undoLines, setUndoLines] = useState<Line[]>([]); // manages lines for redo
   const isDrawing = useRef(false);
   const [currentColour, setCurrentColour] = useState<Colour[]>([
-    "#000000",
+    "#ffffff",
     "#dc2626",
     "#16a34a",
     "#2563eb",
   ]);
   const [canvasSize, setCanvasSize] = useState({ width: 500, height: 500 });
 
-  const [colorPicker, setColorPicker] = useState("#000000");
+  const [colorPicker, setColorPicker] = useState("#ffffff");
   const [colorPickerUsed, setColorPickerUsed] = useState(false);
   const [strokeWidth, setStrokeWidth] = useState(5);
 
-  const [file, setFile] = useState<File | null>(null);
+  const fileUploadRef = useRef<HTMLInputElement>(null);
 
   const handleMouseDown = (e: any) => {
     isDrawing.current = true;
@@ -131,6 +132,30 @@ export default function SimpleCanvasV2() {
     };
   }, [showCursor, mousePos, canvasSize]);
 
+  // called when file is changed to null
+  const resetEditor = () => {
+    setLines([]);
+    setUndoLines([]);
+    setCanvasSize({ width: 500, height: 500 });
+
+    // reset upload input
+    const upload = fileUploadRef.current;
+    if (!upload) return;
+    upload.value = "";
+
+    // remove background image
+    const bg = document.querySelector(".konvajs-content") as HTMLDivElement;
+    if (!bg) return;
+    bg.style.backgroundImage = "";
+  };
+
+  // if file is changed to null, reset canvas
+  useEffect(() => {
+    if (file === null) {
+      resetEditor();
+    }
+  }, [file]);
+
   // save canvas
   const saveCanvas = () => {
     const canvas: HTMLCanvasElement | null = document.querySelector(
@@ -168,7 +193,7 @@ export default function SimpleCanvasV2() {
         drawOldCanvas();
       };
     } else {
-      newCtx.fillStyle = "#ffffff";
+      newCtx.fillStyle = "#000000";
       newCtx.fillRect(0, 0, canvasSize.width, canvasSize.height);
       drawOldCanvas();
     }
@@ -190,6 +215,7 @@ export default function SimpleCanvasV2() {
       )}
       <input
         id="file-upload"
+        ref={fileUploadRef}
         type="file"
         accept="image/*"
         className="hidden"
@@ -241,19 +267,7 @@ export default function SimpleCanvasV2() {
         <button
           disabled={lines.length === 0 && file === null}
           onClick={() => {
-            setLines([]);
-            setUndoLines([]);
-
-            setCanvasSize({ width: 500, height: 500 });
-
             setFile(null);
-
-            // remove background image
-            const bg = document.querySelector(
-              ".konvajs-content"
-            ) as HTMLDivElement;
-            if (!bg) return;
-            bg.style.backgroundImage = "";
           }}
         >
           <FontAwesomeIcon icon={faCancel} />
@@ -355,7 +369,7 @@ export default function SimpleCanvasV2() {
           <FontAwesomeIcon icon={faRedo} />
         </button>
 
-        <button onClick={() => document.getElementById("file-upload")?.click()}>
+        <button onClick={() => fileUploadRef.current?.click()}>
           <FontAwesomeIcon icon={faUpload} />
         </button>
 

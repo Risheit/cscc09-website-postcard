@@ -32,6 +32,8 @@ export default function Page() {
     location: { lat: 0, lng: 0 },
   });
 
+  const [file, setFile] = useState<File | null>(null);
+
   const [formData, setFormData] = useState({
     location: "",
     title: "",
@@ -199,7 +201,7 @@ export default function Page() {
         style={{ display: secondStep && isImagePost ? "block" : "none" }}
         className="flex w-full place-items-center"
       >
-        <SimpleCanvasV2 />
+        <SimpleCanvasV2 file={file} setFile={setFile} />
       </div>
 
       {secondStep && (
@@ -212,7 +214,17 @@ export default function Page() {
       >
         <button
           className="p-2 bg-background-200 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
-          onClick={() => setSecondStep(false)}
+          onClick={() => {
+            setFile(null);
+            setFormData({
+              location: "",
+              title: "",
+              text: "",
+              date: "",
+            });
+
+            setSecondStep(false);
+          }}
         >
           back
         </button>

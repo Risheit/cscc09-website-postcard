@@ -11,6 +11,7 @@ export default function CreatePostForm(props: {
         <input
           className="p-2 bg-background-50 border border-text-500 rounded"
           placeholder="Enter location..."
+          value={formData.location || ""}
           onChange={(ev) => {
             setFormData({ ...formData, location: ev.target.value });
           }}
@@ -22,6 +23,7 @@ export default function CreatePostForm(props: {
         <input
           className="p-2 bg-background-50 border border-text-500 rounded"
           placeholder="Enter title..."
+          value={formData.title || ""}
           onChange={(ev) => {
             setFormData({ ...formData, title: ev.target.value });
           }}
@@ -33,6 +35,7 @@ export default function CreatePostForm(props: {
         <textarea
           className="p-2 bg-background-50 border border-text-500 rounded"
           placeholder="Enter text..."
+          value={formData.text || ""}
           onChange={(ev) => {
             setFormData({ ...formData, text: ev.target.value });
           }}
@@ -45,6 +48,7 @@ export default function CreatePostForm(props: {
           type="datetime-local"
           className="p-2 bg-background-50 border border-text-500 rounded"
           onFocus={(ev) => ev.target.showPicker()}
+          value={formData.date || ""}
           onChange={(ev) => {
             setFormData({ ...formData, date: ev.target.value });
           }}
