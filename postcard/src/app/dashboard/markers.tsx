@@ -2,19 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AdvancedMarker, Pin, useMap } from "@vis.gl/react-google-maps";
 import { Marker, MarkerClusterer } from "@googlemaps/markerclusterer";
 
+import { Post } from "../models/post";
 export type Poi = { key: string; location: google.maps.LatLngLiteral };
 
-// TODO: replace with real data
-import { Post } from "../models/post";
-import { mockPosts } from "./mockPosts";
+export const PoiMarkers = (props: { mapId: string; posts: Post[] }) => {
+  const { mapId, posts } = props;
+  const pois: Poi[] = posts.map((post: Post) => ({
+    key: post.id.toString(),
+    location: { lat: post.lat, lng: post.lng },
+  }));
 
-export const locations: Poi[] = mockPosts.map((post: Post) => ({
-  key: post.id.toString(),
-  location: { lat: post.location.lat, lng: post.location.lng },
-}));
-
-export const PoiMarkers = (props: { pois: Poi[]; mapId: string }) => {
-  const { pois, mapId } = props;
   const map = useMap(mapId);
   const [markers, setMarkers] = useState<{ [key: string]: Marker }>({});
   const clusterer = useRef<MarkerClusterer | null>(null);

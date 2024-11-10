@@ -1,17 +1,22 @@
 export type Post = {
   id: number;
-  userid: number;
-  username: string;
-  userpfp?: string;
+
+  owner: number;
+  poster_display_name: string;
+  poster_profile_pic?: string;
+
   title: string;
-  type: "postcard" | "text";
-  url?: string;
-  text?: string;
-  location: {
-    name: string;
-    lat: number;
-    lng: number;
-  };
-  date: Date;
-  posteddate: Date;
+  image_content?: string;
+  text_content?: string;
+
+  location_name: string;
+  lng: number;
+  lat: number;
+
+  posted_time: Date;
+  created: Date;
+
+  likes: number;
+  dislikes: number;
+  num_comments: number;
 };

@@ -8,7 +8,7 @@ import {
   MapCameraChangedEvent,
 } from "@vis.gl/react-google-maps";
 
-import { locations, PoiMarkers } from "./markers";
+import { PoiMarkers } from "./markers";
 import Dashboard from "../components/Dashboard/Dashboard";
 import LocateMe from "../components/Dashboard/LocateMe/LocateMe";
 
@@ -22,6 +22,13 @@ export default function Page() {
 
   // TODO: replace with real data
   const [posts, setPosts] = useState<Post[]>(mockPosts);
+
+  useEffect(() => {
+    fetch("/api/posts").then(async (res) => {
+      const p = await res.json();
+      setPosts(p);
+    });
+  }, []);
 
   const DASHBOARD_MAP_ID = "postcard-map";
 
@@ -85,7 +92,7 @@ export default function Page() {
               setMapLoaded(true);
             }}
           >
-            <PoiMarkers pois={locations} mapId={DASHBOARD_MAP_ID} />
+            <PoiMarkers mapId={DASHBOARD_MAP_ID} posts={posts} />
           </Map>
         </div>
         <Dashboard posts={posts} mapId={DASHBOARD_MAP_ID} />

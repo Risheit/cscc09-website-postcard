@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import {
   faMapPin,
-  faUserCircle,
   faThumbsUp,
   faThumbsDown,
   faComments,
@@ -36,12 +35,12 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
           <div className="flex place-items-center">
             {/* profile pic and name */}
             <Link
-              href={`/user/${post.userid}`}
+              href={`/user/${post.owner}`}
               className="flex place-items-center"
             >
-              {post.userpfp ? (
+              {post.poster_profile_pic ? (
                 <img
-                  src={post.userpfp}
+                  src={post.poster_profile_pic}
                   alt="profile"
                   className="rounded-full w-6"
                 />
@@ -49,14 +48,16 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
                 <span className="rounded-full h-6 w-6 bg-primary-600"></span>
               )}
 
-              <span className="text-primary-600 pl-2">{post.username}</span>
+              <span className="text-primary-600 pl-2">
+                {post.poster_display_name}
+              </span>
             </Link>
 
             <span className="flex-grow"></span>
 
             {/* date stamp, today formatted */}
             <span className="text-sm font-light text-text-900">
-              {post.date.toLocaleString("en-US", {
+              {new Date(post.posted_time).toLocaleString("en-US", {
                 year: "2-digit",
                 month: "2-digit",
                 day: "2-digit",
@@ -68,26 +69,30 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
             className="flex place-items-center justify-between gap-2 text-text-800 text-xs font-light hover:bg-background-200 active:bg-background-300 rounded-md cursor-pointer"
             onClick={(e) => {
               if (!map) return;
-              map.panTo(post.location);
+              map.panTo(post);
               map.setZoom(15);
             }}
           >
             <span>
               <FontAwesomeIcon icon={faMapPin} className="pr-1" />
-              {post.location.name ? post.location.name : "Unnamed location"}
+              {post.location_name ? post.location_name : "Unnamed location"}
             </span>
             <span>
-              {post.location.lat}° {post.location.lat > 0 ? "N" : "S"},{" "}
-              {post.location.lng}° {post.location.lng > 0 ? "W" : "E"}
+              {post.lat}° {post.lat > 0 ? "N" : "S"}, {post.lng}°{" "}
+              {post.lng > 0 ? "W" : "E"}
             </span>
           </div>
-          {post.type === "postcard" ? (
+          {post.image_content ? (
             <Link
               href={`/post/${post.id}`}
               className="bg-slate-50 p-2 w-full rounded-sm"
             >
-              <img src={post.url} alt={post.title} className="shadow-sm mb-2" />
-
+              {/* TODO: get images to work */}
+              <img
+                src={post.image_url}
+                alt={post.title}
+                className="shadow-sm mb-2"
+              />
               <span className="h-4 bg-slate-50 text-black">{post.title}</span>
             </Link>
           ) : (
@@ -97,7 +102,7 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
             href={`/post/${post.id}`}
             className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600"
           >
-            {post.text}
+            {post.text_content}
           </Link>
 
           <div className="flex place-items-center gap-2">
@@ -105,14 +110,14 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
               className="text-primary-500 inline whitespace-nowrap"
               onClick={(e) => {}}
             >
-              4
+              {post.likes}
               <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
               onClick={(e) => {}}
             >
-              2
+              {post.dislikes}
               <FontAwesomeIcon icon={faThumbsDown} className="pl-1" />
             </button>
             <button
@@ -121,7 +126,7 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
                 router.push(`/post/${post.id}`);
               }}
             >
-              3
+              {post.num_comments}
               <FontAwesomeIcon icon={faComments} className="pl-1" />
             </button>
 
@@ -147,7 +152,7 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
 
           <span className="text-right text-text-400 text-xs font-light italic text-nowrap">
             posted:{" "}
-            {post.posteddate.toLocaleString("en-US", {
+            {new Date(post.created).toLocaleString("en-US", {
               year: "2-digit",
               month: "2-digit",
               day: "2-digit",
