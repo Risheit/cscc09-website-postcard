@@ -28,11 +28,14 @@ export default function RootLayout({
         <div className="min-h-[100vh] flex flex-col">
           <Header />
 
-          <div id="content" className="flex place-self-center justify-center">
+          <div
+            id="content"
+            className="flex place-self-center justify-center w-full bg-background-100"
+          >
             {children}
           </div>
 
-          <div className="flex-grow"></div>
+          <div className="flex-grow bg-background-100"></div>
         </div>
         <Footer />
       </body>
