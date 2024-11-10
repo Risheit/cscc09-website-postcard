@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import pool from '@/backend/cloudsql';
 import { QueryResult } from 'pg';
 import { getUserByUsername } from '@/backend/users';
+import { authorizeSession } from '@/app/api/auth/config';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -14,12 +15,13 @@ export async function GET(req: NextRequest) {
 
   const owner = ownerName ? await getUserByUsername(ownerName) : undefined;
   const ownerCondition = owner ? `AND owner = $6::integer` : '';
-  console.log('ownerCondition', ownerCondition, owner);
 
   let query: QueryResult;
   if (!x || !y) {
     query = await pool.query(
-      `SELECT * FROM posts
+      `SELECT id, text_content, image_content, created, likes, dislikes,
+      ST_X(location::geometry) AS xloc, ST_Y(location::geometry) as yloc
+      FROM posts
       WHERE 1=1 ${ownerCondition}
       ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint`,
       [limit, offset]
@@ -43,18 +45,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { x, y, owner, text } = body;
-  const ownerUser = await getUserByUsername(owner);
+  const session = await authorizeSession();
 
-  const query = await pool.query(
-    `INSERT INTO posts (location, owner, text, created)
-    VALUES (ST_MakePoint($1::integer,$2::integer), $3::integer, $4::text, NOW())
-    RETURNING *`,
-    [x, y, ownerUser.id, text]
-  );
+  if (!session) {
+    return Response.json({ error: 'Unauthorized' }, { status: 405 });
+  }
 
-  return Response.json(query.rows[0], {
-    status: 200,
-  });
+  return Response.json({ req, session });
 }
