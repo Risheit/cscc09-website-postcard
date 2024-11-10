@@ -8,8 +8,6 @@ import { getServerSession, NextAuthOptions, Session } from 'next-auth';
 import {
   Account,
   getAccountByUsername,
-  getUserById,
-  User,
 } from '@/backend/users';
 
 // See: https://next-auth.js.org/configuration/nextjs#getserversession

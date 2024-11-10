@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
 
   const owner = ownerName ? await getUserByUsername(ownerName) : undefined;
   const ownerCondition = owner ? `AND owner = $6::integer` : '';
-  console.log('ownerCondition', ownerCondition, owner);
 
   // Distance search comes from: https://stackoverflow.com/a/49307081/25875922
 

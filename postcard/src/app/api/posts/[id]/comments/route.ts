@@ -12,7 +12,7 @@ export async function GET(
   const offset = searchParams.get('offset') ?? 0;
   const { id } = await params;
 
-  let query = await pool.query(
+  const query = await pool.query(
     `SELECT ${asReadablePostQuery} FROM posts
       WHERE comment_of = $1::integer
       ORDER BY created DESC LIMIT $2::bigint OFFSET $3::bigint`,
