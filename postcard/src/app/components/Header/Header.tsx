@@ -1,10 +1,6 @@
 "use client";
 import Link from "next/link";
-import {
-  faMapLocationDot,
-  faPlus,
-  faUserCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { faMapLocationDot, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 
