@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import {
+  faMapPin,
   faThumbsUp,
   faThumbsDown,
   faComments,
@@ -61,13 +62,19 @@ export default function Dashboard(props: { posts: any }) {
           </div>
           <div
             className="flex place-items-center justify-between gap-2 text-text-800 text-xs font-light hover:bg-background-200 active:bg-background-300 rounded-md"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+
               if (!map) return;
               map.panTo(post.location);
               map.setZoom(15);
             }}
           >
-            <span>📍{post.location.name}</span>
+            <span>
+              <FontAwesomeIcon icon={faMapPin} className="pr-1" />
+              {post.location.name ? post.location.name : "Unnamed location"}
+            </span>
             <span>
               {post.location.lat}° {post.location.lat > 0 ? "N" : "S"},{" "}
               {post.location.lng}° {post.location.lng > 0 ? "W" : "E"}
