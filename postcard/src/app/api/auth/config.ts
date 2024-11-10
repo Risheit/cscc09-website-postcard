@@ -5,7 +5,7 @@ import type {
   NextApiResponse,
 } from 'next';
 import { getServerSession, NextAuthOptions, Session } from 'next-auth';
-import { getAccountByUsername, getUserById, User } from '@/backend/users';
+import { Account, getAccountByUsername, getUserById, User } from '@/backend/users';
 
 // See: https://next-auth.js.org/configuration/nextjs#getserversession
 export function authorizeSession(
@@ -18,7 +18,7 @@ export function authorizeSession(
 }
 
 export interface DBSession extends Session {
-  account?: User;
+  account?: Account;
 }
 
 export const config = {

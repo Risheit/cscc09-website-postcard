@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import pool from '@/backend/cloudsql';
 import { QueryResult } from 'pg';
 import { getUserByUsername } from '@/backend/users';
-import { authorizeSession } from '@/app/api/auth/config';
+import { authorizeSession, DBSession } from '@/app/api/auth/config';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   if (!x || !y) {
     query = await pool.query(
       `SELECT id, text_content, image_content, created, likes, dislikes,
-      ST_X(location::geometry) AS xloc, ST_Y(location::geometry) as yloc
+      ST_X(location::geometry) AS lng, ST_Y(location::geometry) as lat
       FROM posts
       WHERE 1=1 ${ownerCondition}
       ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint`,
@@ -30,11 +30,11 @@ export async function GET(req: NextRequest) {
   } else {
     query = await pool.query(
       `SELECT id, text_content, image_content, created, likes, dislikes,
-      ST_X(location::geometry) AS xloc, ST_Y(location::geometry) as yloc
+      ST_X(location::geometry) AS lng, ST_Y(location::geometry) as lat
       FROM posts
-      WHERE ST_DWithin(posts.location, ST_MakePoint($1::integer,$2::integer)::geography, $3::integer)
+      WHERE ST_DWithin(posts.location, ST_MakePoint($1::decimal,$2::decimal)::geography, $3::decimal)
       ${ownerCondition}
-      ORDER BY posts.location <-> ST_MakePoint($1::integer,$2::integer)::geography, created DESC
+      ORDER BY posts.location <-> ST_MakePoint($1::decimal,$2::decimal)::geography, created DESC
       LIMIT $4::bigint OFFSET $5::bigint`,
       [x, y, distance, limit, offset].concat(owner ? [owner?.id] : [])
     );
@@ -46,11 +46,26 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await authorizeSession();
-
+  const session = (await authorizeSession()) as DBSession;
   if (!session) {
     return Response.json({ error: 'Unauthorized' }, { status: 405 });
   }
 
-  return Response.json({ req, session });
+  const { textContent, imagePath, lat, lng } = await req.json();
+
+  if (lat === undefined || lng === undefined) {
+    return Response.json(
+      { error: 'Missing lat and lng fields' },
+      { status: 400 }
+    );
+  }
+
+  const query = await pool.query(
+    `INSERT INTO posts (text_content, image_content, location, owner)
+    VALUES ($1::text, $2::text, ST_MakePoint($3::decimal,$4::decimal), $5::integer)
+    RETURNING *`,
+    [textContent ?? null, imagePath ?? null, lng, lat, session.account?.userId]
+  );
+
+  return Response.json(query.rows, { status: 200 });
 }
