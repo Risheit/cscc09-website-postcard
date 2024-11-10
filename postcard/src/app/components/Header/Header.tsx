@@ -1,13 +1,18 @@
+"use client";
 import Link from "next/link";
 import {
   faMapLocationDot,
+  faPlus,
   faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
+
   return (
-    <header className="h-12 flex place-items-center border-b border-background-300 shadow-md shadow-background-100 p-2">
+    <header className="h-12 flex relative place-items-center justify-between border-b border-background-300 shadow-md shadow-background-100 p-2">
       {/* click route to /dashboard or / */}
       <Link href="/" className="h-full flex place-items-center">
         <span className="aspect-square h-full flex items-center justify-center rounded-full bg-primary-500 ml-2">
@@ -16,7 +21,16 @@ export default function Header() {
         <span className="pl-2">postcard.</span>
       </Link>
 
-      <span className="flex-grow"></span>
+      <button
+        className="absolute bg-primary-300 px-4 inline"
+        style={{ left: "50%", transform: "translateX(-50%)" }} // perfectly centered :)
+        onClick={() => {
+          router.push("/post/create");
+        }}
+      >
+        <FontAwesomeIcon icon={faPlus} />
+        <span className="pl-2">create post</span>
+      </button>
 
       {/* if not logged in */}
       {/* <span className="flex gap-2 place-items-center pr-2">
