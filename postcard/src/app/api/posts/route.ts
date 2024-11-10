@@ -60,9 +60,9 @@ export async function POST(req: NextRequest) {
 
   const query = await pool.query(
     `INSERT INTO posts (title, text_content, image_content, location_name, location,
-      owner, posted_time)
+      owner, posted_time, num_comments)
     VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
-      $7::integer, $8::timestamp)
+      $7::integer, $8::timestamp, 0)
     RETURNING ${asReadablePostQuery}`,
     [
       title ?? null,
