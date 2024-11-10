@@ -2,12 +2,13 @@ import { faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMap } from "@vis.gl/react-google-maps";
 
-export default function LocateMe() {
-  const map = useMap("postcard-map");
+export default function LocateMe(props: { mapId: string; className?: string }) {
+  const { mapId, className } = props;
+  const map = useMap(mapId);
 
   return (
     <div
-      className="absolute left-0 p-2 z-10 "
+      className={"absolute left-0 p-2 z-10 " + (className ?? "")}
       style={{ width: "20px", height: "20px" }}
     >
       <button

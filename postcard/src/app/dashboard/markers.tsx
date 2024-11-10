@@ -13,8 +13,9 @@ export const locations: Poi[] = mockPosts.map((post: Post) => ({
   location: { lat: post.location.lat, lng: post.location.lng },
 }));
 
-export const PoiMarkers = (props: { pois: Poi[] }) => {
-  const map = useMap("postcard-map");
+export const PoiMarkers = (props: { pois: Poi[]; mapId: string }) => {
+  const { pois, mapId } = props;
+  const map = useMap(mapId);
   const [markers, setMarkers] = useState<{ [key: string]: Marker }>({});
   const clusterer = useRef<MarkerClusterer | null>(null);
 
@@ -60,7 +61,7 @@ export const PoiMarkers = (props: { pois: Poi[] }) => {
 
   return (
     <>
-      {props.pois.map((poi: Poi) => (
+      {pois.map((poi: Poi) => (
         <AdvancedMarker
           key={poi.key}
           position={poi.location}

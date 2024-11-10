@@ -16,11 +16,14 @@ import { Post } from "../models/post";
 import { mockPosts } from "./mockPosts";
 
 export default function Page() {
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
   const [cameraLocation, setCameraLocation] = useState({ lat: 0, lng: 0 });
 
   // TODO: replace with real data
   const [posts, setPosts] = useState<Post[]>(mockPosts);
+
+  const DASHBOARD_MAP_ID = "postcard-map";
 
   useEffect(() => {
     const resizeMap = () => {
@@ -58,7 +61,8 @@ export default function Page() {
           }}
         >
           <Map
-            id="postcard-map"
+            style={{ visibility: mapLoaded ? "visible" : "hidden" }}
+            id={DASHBOARD_MAP_ID}
             defaultZoom={
               cameraLocation.lat === 0 && cameraLocation.lng === 0 ? 2 : 5
             }
@@ -77,12 +81,15 @@ export default function Page() {
             disableDoubleClickZoom={true}
             scrollwheel={true}
             colorScheme={"FOLLOW_SYSTEM"}
+            onTilesLoaded={() => {
+              setMapLoaded(true);
+            }}
           >
-            <PoiMarkers pois={locations} />
+            <PoiMarkers pois={locations} mapId={DASHBOARD_MAP_ID} />
           </Map>
         </div>
-        <Dashboard posts={posts} />
-        <LocateMe />
+        <Dashboard posts={posts} mapId={DASHBOARD_MAP_ID} />
+        <LocateMe mapId={DASHBOARD_MAP_ID} />
       </APIProvider>
     </>
   );

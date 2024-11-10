@@ -16,9 +16,9 @@ import { useRouter } from "next/navigation";
 
 import { Post } from "@/app/models/post";
 
-export default function Dashboard(props: { posts: any }) {
-  const { posts }: { posts: Post[] } = props;
-  const map = useMap("postcard-map");
+export default function Dashboard(props: { posts: Post[]; mapId: string }) {
+  const { posts, mapId }: { posts: Post[]; mapId: string } = props;
+  const map = useMap(mapId);
 
   const router = useRouter();
 
@@ -91,7 +91,7 @@ export default function Dashboard(props: { posts: any }) {
               <span className="h-4 bg-slate-50 text-black">{post.title}</span>
             </Link>
           ) : (
-            <></>
+            <span className="h-4 mb-2">{post.title}</span>
           )}
           <Link
             href={`/post/${post.id}`}

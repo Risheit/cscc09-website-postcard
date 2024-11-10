@@ -173,7 +173,7 @@ export default function SimpleCanvasV2() {
   };
 
   return (
-    <div className="flex flex-col place-items-center w-[500px] border rounded-md overflow-hidden">
+    <div className="flex flex-col place-items-center w-[500px] border border-background-300 rounded-md overflow-hidden shadow-lg">
       {showCursor && (
         <div
           id="circularcursor"
@@ -237,7 +237,7 @@ export default function SimpleCanvasV2() {
       ></input>
       <div className="w-full h-10 flex place-items-center gap-1 p-1">
         <button
-          disabled={lines.length === 0}
+          disabled={lines.length === 0 && file === null}
           onClick={() => {
             setLines([]);
             setUndoLines([]);
@@ -257,13 +257,13 @@ export default function SimpleCanvasV2() {
           <FontAwesomeIcon icon={faCancel} />
         </button>
         <button
-          className={tool === "brush" ? "bg-white text-black" : ""}
+          className={tool === "brush" ? "bg-background-300 text-text-900" : ""}
           onClick={() => setTool("brush")}
         >
           <FontAwesomeIcon icon={faPencil} />
         </button>
         <button
-          className={tool === "eraser" ? "bg-white text-black " : ""}
+          className={tool === "eraser" ? "bg-background-300 text-text-900" : ""}
           onClick={() => setTool("eraser")}
         >
           <FontAwesomeIcon icon={faEraser} />
