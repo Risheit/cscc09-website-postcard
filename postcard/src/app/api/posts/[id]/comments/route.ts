@@ -13,7 +13,9 @@ export async function GET(
   const { id } = await params;
 
   const query = await pool.query(
-    `SELECT ${asReadablePostQuery} FROM posts
+    `SELECT ${asReadablePostQuery}, 
+      users.display_name as poster_display_name, users.profile_pic as poster_profile_pic
+      FROM posts JOIN users ON owner = users.id
       WHERE comment_of = $1::integer
       ORDER BY created DESC LIMIT $2::bigint OFFSET $3::bigint`,
     [id, limit, offset]
