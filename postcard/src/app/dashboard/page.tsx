@@ -53,7 +53,7 @@ export default function Page() {
           style={{
             width: mapSize.width,
             height: mapSize.height,
-            color: "black", // resets text color
+            color: "initial", // resets text color
           }}
         >
           <Map
