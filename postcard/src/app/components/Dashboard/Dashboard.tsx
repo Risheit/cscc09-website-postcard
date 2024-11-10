@@ -15,11 +15,53 @@ import { useRouter } from "next/navigation";
 
 import { Post } from "@/app/models/post";
 
-export default function Dashboard(props: { posts: Post[]; mapId: string }) {
-  const { posts, mapId }: { posts: Post[]; mapId: string } = props;
+export default function Dashboard(props: {
+  posts: Post[];
+  setPosts: any;
+  mapId: string;
+}) {
+  const {
+    posts,
+    setPosts,
+    mapId,
+  }: { posts: Post[]; setPosts: any; mapId: string } = props;
   const map = useMap(mapId);
 
   const router = useRouter();
+
+  const upvotePost = (postId: number) => {
+    fetch(`/api/posts/${postId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "like" }),
+    }).then(async (res) => {
+      setPosts((prev: Post[]) => {
+        return prev.map((post) => {
+          if (post.id === postId) {
+            return { ...post, likes: post.likes + 1 };
+          } else {
+            return post;
+          }
+        });
+      });
+    });
+  };
+
+  const downvotePost = (postId: number) => {
+    fetch(`/api/posts/${postId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "dislike" }),
+    }).then(async (res) => {
+      setPosts((prev: Post[]) => {
+        return prev.map((post) => {
+          if (post.id === postId) {
+            return { ...post, dislikes: post.dislikes + 1 };
+          } else {
+            return post;
+          }
+        });
+      });
+    });
+  };
 
   return (
     <div
@@ -113,14 +155,18 @@ export default function Dashboard(props: { posts: Post[]; mapId: string }) {
           <div className="flex place-items-center gap-2">
             <button
               className="text-primary-500 inline whitespace-nowrap"
-              onClick={(e) => {}}
+              onClick={(e) => {
+                upvotePost(post.id);
+              }}
             >
               {post.likes}
               <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
-              onClick={(e) => {}}
+              onClick={(e) => {
+                downvotePost(post.id);
+              }}
             >
               {post.dislikes}
               <FontAwesomeIcon icon={faThumbsDown} className="pl-1" />

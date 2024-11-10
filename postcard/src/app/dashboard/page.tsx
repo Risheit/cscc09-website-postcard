@@ -93,7 +93,7 @@ export default function Page() {
             <PoiMarkers mapId={DASHBOARD_MAP_ID} posts={posts} />
           </Map>
         </div>
-        <Dashboard posts={posts} mapId={DASHBOARD_MAP_ID} />
+        <Dashboard posts={posts} setPosts={setPosts} mapId={DASHBOARD_MAP_ID} />
         <LocateMe mapId={DASHBOARD_MAP_ID} />
       </APIProvider>
     </>
