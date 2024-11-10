@@ -1,14 +1,9 @@
 import { Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
 import { Pool } from 'pg';
 
-function dbName() {
-  console.log(JSON.stringify({ variables: process.env }));
-  return process.env.DATABASE_NAME!;
-}
-
 const connector = new Connector();
 const clientOpts = await connector.getOptions({
-  instanceConnectionName: dbName(),
+  instanceConnectionName: 'postcard-439817:me-central1:postcard-db',
   ipType: IpAddressTypes.PUBLIC,
 });
 
