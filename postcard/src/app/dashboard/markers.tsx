@@ -55,6 +55,7 @@ export const PoiMarkers = (props: { pois: Poi[]; mapId: string }) => {
       if (!map) return;
       if (!ev.latLng) return;
       map.panTo(ev.latLng);
+      map.setZoom(15);
     },
     [map]
   );
