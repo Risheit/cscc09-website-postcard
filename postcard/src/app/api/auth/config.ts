@@ -5,7 +5,12 @@ import type {
   NextApiResponse,
 } from 'next';
 import { getServerSession, NextAuthOptions, Session } from 'next-auth';
-import { Account, getAccountByUsername, getUserById, User } from '@/backend/users';
+import {
+  Account,
+  getAccountByUsername,
+  getUserById,
+  User,
+} from '@/backend/users';
 
 // See: https://next-auth.js.org/configuration/nextjs#getserversession
 export function authorizeSession(

@@ -3,6 +3,7 @@ import pool from '@/backend/cloudsql';
 import { QueryResult } from 'pg';
 import { getUserByUsername } from '@/backend/users';
 import { authorizeSession, DBSession } from '@/app/api/auth/config';
+import { asReadablePostQuery } from '@/backend/posts';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -17,21 +18,19 @@ export async function GET(req: NextRequest) {
   const ownerCondition = owner ? `AND owner = $6::integer` : '';
   console.log('ownerCondition', ownerCondition, owner);
 
+  // Distance search comes from: https://stackoverflow.com/a/49307081/25875922
+
   let query: QueryResult;
   if (!x || !y) {
     query = await pool.query(
-      `SELECT id, text_content, image_content, created, likes, dislikes,
-      ST_X(location::geometry) AS lng, ST_Y(location::geometry) as lat
-      FROM posts
+      `SELECT ${asReadablePostQuery} FROM posts
       WHERE 1=1 ${ownerCondition}
       ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint`,
       [limit, offset]
     );
   } else {
     query = await pool.query(
-      `SELECT id, text_content, image_content, created, likes, dislikes,
-      ST_X(location::geometry) AS lng, ST_Y(location::geometry) as lat
-      FROM posts
+      `SELECT ${asReadablePostQuery} FROM posts
       WHERE ST_DWithin(posts.location, ST_MakePoint($1::decimal,$2::decimal)::geography, $3::decimal)
       ${ownerCondition}
       ORDER BY posts.location <-> ST_MakePoint($1::decimal,$2::decimal)::geography, created DESC
@@ -63,7 +62,7 @@ export async function POST(req: NextRequest) {
   const query = await pool.query(
     `INSERT INTO posts (text_content, image_content, location, owner)
     VALUES ($1::text, $2::text, ST_MakePoint($3::decimal,$4::decimal), $5::integer)
-    RETURNING *`,
+    RETURNING ${asReadablePostQuery}`,
     [textContent ?? null, imagePath ?? null, lng, lat, session.account?.userId]
   );
 
