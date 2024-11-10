@@ -44,7 +44,13 @@ export default function Header() {
       <span className="flex gap-4 place-items-center pr-2">
         <Link href="/account" className="h-full flex place-items-center">
           <span className="aspect-square h-full flex items-center justify-center rounded-full overflow-hidden">
-            <FontAwesomeIcon icon={faUserCircle} className="text-text-900" />
+            {/* TODO: replace with user profile pic */}
+            <img
+              src={"https://picsum.photos/32/32"}
+              alt="profile"
+              className="rounded-full w-6"
+            />
+            {/* <span className="rounded-full h-6 w-6 bg-text-900"></span> */}
           </span>
           <span className="pl-2">Hello, user</span>
         </Link>

@@ -41,7 +41,7 @@ export default function Dashboard(props: { posts: any }) {
             >
               {post.userpfp ? (
                 <img
-                  src={post.userpfp ?? "https://picsum.photos/32/32"}
+                  src={post.userpfp}
                   alt="profile"
                   className="rounded-full w-6"
                 />
