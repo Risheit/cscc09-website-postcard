@@ -10,6 +10,7 @@ import {
 
 import { locations, PoiMarkers } from "./markers";
 import Dashboard from "../components/Dashboard/Dashboard";
+import LocateMe from "../components/Dashboard/LocateMe/LocateMe";
 
 import { Post } from "../models/post";
 import { mockPosts } from "./mockPosts";
@@ -31,13 +32,13 @@ export default function Page() {
     window.addEventListener("resize", resizeMap);
     resizeMap();
 
-    // ask for user location to center map by default
-    navigator.geolocation.getCurrentPosition((position) => {
-      setCameraLocation({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-    });
+    // load default camera location
+    localStorage.getItem("defaultCamera") &&
+      setCameraLocation(
+        JSON.parse(
+          localStorage.getItem("defaultCamera") ?? '{"lat" : 0, "lng" : 0}'
+        )
+      );
 
     return () => window.removeEventListener("resize", resizeMap);
   }, []);
@@ -64,6 +65,10 @@ export default function Page() {
             defaultCenter={{ lat: cameraLocation.lat, lng: cameraLocation.lng }}
             mapId={process.env.NEXT_PUBLIC_GMP_MAP_ID ?? ""}
             onCameraChanged={(ev: MapCameraChangedEvent) => {
+              localStorage.setItem(
+                "defaultCamera",
+                JSON.stringify(ev.detail.center)
+              );
               // TODO: maybe update posts based on map bounds
             }}
             minZoom={2}
@@ -71,11 +76,13 @@ export default function Page() {
             disableDefaultUI={true}
             disableDoubleClickZoom={true}
             scrollwheel={true}
+            colorScheme={"FOLLOW_SYSTEM"}
           >
             <PoiMarkers pois={locations} />
           </Map>
         </div>
         <Dashboard posts={posts} />
+        <LocateMe />
       </APIProvider>
     </>
   );
