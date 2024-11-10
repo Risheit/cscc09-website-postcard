@@ -10,7 +10,7 @@ export default function Header() {
     <header className="h-12 flex place-items-center border-b border-background-300 shadow-md shadow-background-100 p-2">
       {/* click route to /dashboard or / */}
       <Link href="/" className="h-full flex place-items-center">
-        <span className="aspect-square h-full flex items-center justify-center rounded-full bg-primary-500">
+        <span className="aspect-square h-full flex items-center justify-center rounded-full bg-primary-500 ml-2">
           <FontAwesomeIcon icon={faMapLocationDot} className="text-white" />
         </span>
         <span className="pl-2">postcard.</span>
