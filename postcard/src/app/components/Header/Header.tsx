@@ -2,10 +2,11 @@
 import Link from "next/link";
 import { faMapLocationDot, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Header() {
   const router = useRouter();
+  const route = usePathname();
 
   return (
     <header className="h-12 flex relative place-items-center justify-between border-b border-background-300 shadow-md shadow-background-100 p-2">
@@ -17,16 +18,21 @@ export default function Header() {
         <span className="pl-2">postcard.</span>
       </Link>
 
-      <button
-        className="absolute bg-primary-300 px-4 inline"
-        style={{ left: "50%", transform: "translateX(-50%)" }} // perfectly centered :)
-        onClick={() => {
-          router.push("/post/create");
-        }}
-      >
-        <FontAwesomeIcon icon={faPlus} />
-        <span className="pl-2">create post</span>
-      </button>
+      {/* if route is not /post/create, show create post button */}
+      {route !== "/post/create" ? (
+        <button
+          className="absolute bg-primary-300 px-4 inline"
+          style={{ left: "50%", transform: "translateX(-50%)" }} // perfectly centered :)
+          onClick={() => {
+            router.push("/post/create");
+          }}
+        >
+          <FontAwesomeIcon icon={faPlus} />
+          <span className="pl-2">create post</span>
+        </button>
+      ) : (
+        <></>
+      )}
 
       {/* if not logged in */}
       {/* <span className="flex gap-2 place-items-center pr-2">
