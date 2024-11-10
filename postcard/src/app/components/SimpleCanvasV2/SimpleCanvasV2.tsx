@@ -53,7 +53,7 @@ export default function SimpleCanvasV2() {
     if (colorPickerUsed && !currentColour.includes(colorPicker)) {
       colour = colorPicker;
       setCurrentColour([
-        colorPicker,
+        colour,
         currentColour[0],
         ...currentColour.slice(1).filter((c) => c !== colorPicker),
       ]);
@@ -65,7 +65,7 @@ export default function SimpleCanvasV2() {
       {
         tool: tool,
         size: strokeWidth,
-        colour: currentColour[0],
+        colour: colour,
         points: [point.x, point.y],
       },
     ]);
@@ -100,7 +100,9 @@ export default function SimpleCanvasV2() {
     document.body.onmousemove = function (e) {
       setMousePos({ x: e.clientX, y: e.clientY });
 
-      const canvas = document.querySelector("#canvas-stage > div > canvas");
+      const canvas: HTMLCanvasElement | null = document.querySelector(
+        "#canvas-stage > div > canvas"
+      );
 
       if (!canvas) return;
       canvasPos.current = {
@@ -116,10 +118,10 @@ export default function SimpleCanvasV2() {
         e.clientY < canvasPos.current.top + canvasSize.height
       ) {
         setShowCursor(true);
-        document.body.style.cursor = "none";
+        canvas.style.cursor = "none";
       } else {
         setShowCursor(false);
-        document.body.style.cursor = "default";
+        canvas.style.cursor = "default";
       }
     };
 
