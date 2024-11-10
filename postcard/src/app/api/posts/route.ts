@@ -66,5 +66,5 @@ export async function POST(req: NextRequest) {
     [textContent ?? null, imagePath ?? null, lng, lat, session.account?.userId]
   );
 
-  return Response.json(query.rows, { status: 200 });
+  return Response.json(query.rows[0], { status: 200 });
 }
