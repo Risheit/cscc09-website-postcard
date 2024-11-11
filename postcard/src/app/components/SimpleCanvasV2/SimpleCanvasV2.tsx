@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, useEffect, useRef, useState } from "react";
 import { Stage, Layer, Line } from "react-konva";
 import "./SimpleCanvasV2.css";
 
@@ -15,12 +15,16 @@ import {
   faUpload,
   faSave,
 } from "@fortawesome/free-solid-svg-icons";
+import { KonvaEventObject, Node, NodeConfig } from "konva/lib/Node";
 
 type Tool = "brush" | "eraser";
 type Line = { tool: Tool; size: number; colour: Colour; points: number[] };
 type Colour = string; // hex, e.g. "#000000"
 
-export default function SimpleCanvasV2(props: { file: any; setFile: any }) {
+export default function SimpleCanvasV2(props: {
+  file: File | null;
+  setFile: Dispatch<File | null>;
+}) {
   const { file, setFile } = props;
   const [tool, setTool] = useState<Tool>("brush");
   const [lines, setLines] = useState<Line[]>([]);
@@ -40,7 +44,11 @@ export default function SimpleCanvasV2(props: { file: any; setFile: any }) {
 
   const fileUploadRef = useRef<HTMLInputElement>(null);
 
-  const handleMouseDown = (e: any) => {
+  const handleMouseDown = (
+    e:
+      | KonvaEventObject<TouchEvent, Node<NodeConfig>>
+      | KonvaEventObject<MouseEvent, Node<NodeConfig>>
+  ) => {
     isDrawing.current = true;
 
     const stage = e.target.getStage();
@@ -74,7 +82,11 @@ export default function SimpleCanvasV2(props: { file: any; setFile: any }) {
     setUndoLines([]);
   };
 
-  const handleMouseMove = (e: any) => {
+  const handleMouseMove = (
+    e:
+      | KonvaEventObject<TouchEvent, Node<NodeConfig>>
+      | KonvaEventObject<MouseEvent, Node<NodeConfig>>
+  ) => {
     if (!isDrawing.current) return;
 
     const stage = e.target.getStage();
