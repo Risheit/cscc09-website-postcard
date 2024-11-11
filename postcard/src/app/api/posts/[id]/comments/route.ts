@@ -13,7 +13,9 @@ export async function GET(
   const { id } = await params;
 
   const query = await pool.query(
-    `SELECT ${asReadablePostQuery} FROM posts
+    `SELECT ${asReadablePostQuery}, 
+      users.display_name as poster_display_name, users.profile_pic as poster_profile_pic
+      FROM posts JOIN users ON owner = users.id
       WHERE comment_of = $1::integer
       ORDER BY created DESC LIMIT $2::bigint OFFSET $3::bigint`,
     [id, limit, offset]
@@ -33,7 +35,7 @@ export async function POST(
     return Response.json({ error: 'Unauthorized' }, { status: 405 });
   }
 
-  const { textContent, imagePath, locationName, lat, lng, postedTime } =
+  const { textContent, imagePath, locationName, lat, lng, postedTime, title } =
     await req.json();
   const { id } = await params;
 
@@ -44,11 +46,12 @@ export async function POST(
 
   const query = await pool.query(
     `INSERT INTO posts (text_content, image_content, location_name, location,
-      comment_of, owner, posted_time)
-    VALUES ($1::text, $2::text, $3::text, ST_MakePoint($4::decimal,$5::decimal),
-      $6::integer, $7::integer, $8::timestamp)
+      comment_of, owner, posted_time, num_comments)
+    VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
+      $7::integer, $8::integer, $9::timestamp, 0)
     RETURNING ${asReadablePostQuery}`,
     [
+      title ?? null,
       textContent ?? null,
       imagePath ?? null,
       locationName,
@@ -59,6 +62,13 @@ export async function POST(
       postedTime,
     ]
   );
+
+  if (query.rows.length !== 0) {
+    await pool.query(
+      `UPDATE posts SET num_comments = num_comments + 1 WHERE id = $1::integer`,
+      [id]
+    );
+  }
 
   return Response.json(query.rows[0], { status: 200 });
 }

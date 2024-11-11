@@ -22,7 +22,9 @@ export async function GET(req: NextRequest) {
   let query: QueryResult;
   if (!x || !y) {
     query = await pool.query(
-      `SELECT ${asReadablePostQuery} FROM posts
+      `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name,
+      users.profile_pic as poster_profile_pic
+      FROM posts JOIN users on owner = users.id
       WHERE 1=1 ${ownerCondition}
       ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint`,
       [limit, offset]
@@ -49,7 +51,7 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Unauthorized' }, { status: 405 });
   }
 
-  const { textContent, imagePath, locationName, lat, lng, postedTime } =
+  const { textContent, imagePath, locationName, lat, lng, postedTime, title } =
     await req.json();
 
   if (!lat || !lng || !postedTime || !locationName) {
@@ -57,12 +59,13 @@ export async function POST(req: NextRequest) {
   }
 
   const query = await pool.query(
-    `INSERT INTO posts (text_content, image_content, location_name, location,
-      owner, posted_time)
-    VALUES ($1::text, $2::text, $3::text, ST_MakePoint($4::decimal,$5::decimal),
-      $6::integer, $7::timestamp)
+    `INSERT INTO posts (title, text_content, image_content, location_name, location,
+      owner, posted_time, num_comments)
+    VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
+      $7::integer, $8::timestamp, 0)
     RETURNING ${asReadablePostQuery}`,
     [
+      title ?? null,
       textContent ?? null,
       imagePath ?? null,
       locationName,
