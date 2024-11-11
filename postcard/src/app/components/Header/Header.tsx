@@ -13,13 +13,13 @@ export default function Header() {
 
   useEffect(() => {
     // if not logged in then redirect to /api/auth/signin
-    if (
-      !session.data?.user &&
-      pathname !== "/" &&
-      pathname !== "/api/auth/signin"
-    ) {
-      router.push("/api/auth/signin");
-    }
+    // if (
+    //   !session.data?.user &&
+    //   pathname !== "/" &&
+    //   pathname !== "/api/auth/signin"
+    // ) {
+    //   router.push("/api/auth/signin");
+    // }
 
     if (pathname === "/" && session.data?.user) {
       router.push("/dashboard");
