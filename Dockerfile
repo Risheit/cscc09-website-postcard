@@ -24,7 +24,7 @@ COPY / /
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_TELEMETRY_DISABLED=1
 
 RUN \
     if [ -f package.json ]; then npm run build; \
@@ -35,9 +35,9 @@ RUN \
 FROM base AS runner
 WORKDIR /postcard
 
-ENV NODE_ENV=production
+ARG NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -57,26 +57,26 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=$PORT
+ARG PORT=$PORT
 
 ## Auth
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
-ENV AUTH_SECRET=$AUTH_SECRET
-ENV GITHUB_CLIENT_ID=$GITHUB_CLIENT_ID
-ENV GITHUB_CLIENT_SECRET=$GITHUB_CLIENT_SECRET
+ARG NEXTAUTH_URL=$NEXTAUTH_URL
+ARG AUTH_SECRET=$AUTH_SECRET
+ARG GITHUB_CLIENT_ID=$GITHUB_CLIENT_ID
+ARG GITHUB_CLIENT_SECRET=$GITHUB_CLIENT_SECRET
 
 ## Database
-ENV DATABASE_HOST=$DATABASE_HOST
-ENV DATABASE_NAME=$DATABASE_NAME
-ENV DATABASE_USER=$DATABASE_USER
-ENV DATABASE_PASSWORD=$DATABASE_PASSWORD
+ARG DATABASE_HOST=$DATABASE_HOST
+ARG DATABASE_NAME=$DATABASE_NAME
+ARG DATABASE_USER=$DATABASE_USER
+ARG DATABASE_PASSWORD=$DATABASE_PASSWORD
 
 
 # Google Maps Platform
-ENV NEXT_PUBLIC_GMP_API_KEY=$NEXT_PUBLIC_GMP_API_KEY
-ENV NEXT_PUBLIC_GMP_MAP_ID=$NEXT_PUBLIC_GMP_MAP_ID
+ARG NEXT_PUBLIC_GMP_API_KEY=$NEXT_PUBLIC_GMP_API_KEY
+ARG NEXT_PUBLIC_GMP_MAP_ID=$NEXT_PUBLIC_GMP_MAP_ID
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
-ENV HOSTNAME="0.0.0.0"
+ARG HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
