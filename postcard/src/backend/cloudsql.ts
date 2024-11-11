@@ -1,4 +1,4 @@
-import { Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
+// import { Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
 import { Pool } from 'pg';
 
 async function getPool() {
