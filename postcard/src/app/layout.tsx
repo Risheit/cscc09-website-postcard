@@ -11,6 +11,7 @@ config.autoAddCss = false;
 
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
+import { NextAuthProvider } from "./components/NextAuthProvider/NextAuthProvider";
 
 export const metadata: Metadata = {
   title: "Postcard",
@@ -26,14 +27,16 @@ export default function RootLayout({
     <html lang="en">
       <body className={lexend.className}>
         <div className="min-h-[100vh] flex flex-col">
-          <Header />
+          <NextAuthProvider>
+            <Header />
 
-          <div
-            id="content"
-            className="flex place-self-center justify-center w-full bg-background-100"
-          >
-            {children}
-          </div>
+            <div
+              id="content"
+              className="flex place-self-center justify-center w-full bg-background-100"
+            >
+              {children}
+            </div>
+          </NextAuthProvider>
 
           <div className="flex-grow bg-background-100"></div>
         </div>
