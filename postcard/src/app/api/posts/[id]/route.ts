@@ -7,7 +7,6 @@ export async function GET(
   _: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log('params', await params);
   const { id } = await params;
 
   const query = await pool.query(
