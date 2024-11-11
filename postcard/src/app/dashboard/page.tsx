@@ -41,12 +41,13 @@ export default function Page() {
     resizeMap();
 
     // load default camera location
-    localStorage.getItem("defaultCamera") &&
+    if (localStorage.getItem("defaultCamera")) {
       setCameraLocation(
         JSON.parse(
           localStorage.getItem("defaultCamera") ?? '{"lat" : 0, "lng" : 0}'
         )
       );
+    }
 
     return () => window.removeEventListener("resize", resizeMap);
   }, []);

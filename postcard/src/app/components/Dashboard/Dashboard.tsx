@@ -14,17 +14,18 @@ import { useMap } from "@vis.gl/react-google-maps";
 import { useRouter } from "next/navigation";
 
 import { Post } from "@/app/models/post";
+import { Dispatch } from "react";
 
 export default function Dashboard(props: {
   posts: Post[];
-  setPosts: any;
+  setPosts: Dispatch<Post[]>;
   mapId: string;
 }) {
   const {
     posts,
     setPosts,
     mapId,
-  }: { posts: Post[]; setPosts: any; mapId: string } = props;
+  }: { posts: Post[]; setPosts: Dispatch<Post[]>; mapId: string } = props;
   const map = useMap(mapId);
 
   const router = useRouter();
@@ -33,16 +34,16 @@ export default function Dashboard(props: {
     fetch(`/api/posts/${postId}`, {
       method: "PATCH",
       body: JSON.stringify({ action: "like" }),
-    }).then(async (res) => {
-      setPosts((prev: Post[]) => {
-        return prev.map((post) => {
+    }).then(async () => {
+      setPosts(
+        posts.map((post) => {
           if (post.id === postId) {
             return { ...post, likes: post.likes + 1 };
           } else {
             return post;
           }
-        });
-      });
+        })
+      );
     });
   };
 
@@ -50,16 +51,16 @@ export default function Dashboard(props: {
     fetch(`/api/posts/${postId}`, {
       method: "PATCH",
       body: JSON.stringify({ action: "dislike" }),
-    }).then(async (res) => {
-      setPosts((prev: Post[]) => {
-        return prev.map((post) => {
+    }).then(async () => {
+      setPosts(
+        posts.map((post) => {
           if (post.id === postId) {
             return { ...post, dislikes: post.dislikes + 1 };
           } else {
             return post;
           }
-        });
-      });
+        })
+      );
     });
   };
 
@@ -109,7 +110,7 @@ export default function Dashboard(props: {
           </div>
           <div
             className="flex place-items-center justify-between gap-2 text-text-800 text-xs font-light hover:bg-background-200 active:bg-background-300 rounded-md cursor-pointer"
-            onClick={(e) => {
+            onClick={() => {
               if (!map) return;
               map.panTo(post);
               map.setZoom(15);
@@ -155,7 +156,7 @@ export default function Dashboard(props: {
           <div className="flex place-items-center gap-2">
             <button
               className="text-primary-500 inline whitespace-nowrap"
-              onClick={(e) => {
+              onClick={() => {
                 upvotePost(post.id);
               }}
             >
@@ -164,7 +165,7 @@ export default function Dashboard(props: {
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
-              onClick={(e) => {
+              onClick={() => {
                 downvotePost(post.id);
               }}
             >
@@ -173,7 +174,7 @@ export default function Dashboard(props: {
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
-              onClick={(e) => {
+              onClick={() => {
                 router.push(`/post/${post.id}`);
               }}
             >
@@ -185,7 +186,7 @@ export default function Dashboard(props: {
 
             <button
               className="text-primary-500"
-              onClick={(e) => {
+              onClick={() => {
                 router.push(`/post/${post.id}/remix`);
               }}
             >
@@ -193,7 +194,7 @@ export default function Dashboard(props: {
             </button>
             <button
               className="text-primary-500"
-              onClick={(e) => {
+              onClick={() => {
                 // TODO: copy post url to clipboard
               }}
             >

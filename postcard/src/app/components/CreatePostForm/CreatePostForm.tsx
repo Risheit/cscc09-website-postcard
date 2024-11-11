@@ -1,6 +1,18 @@
+import { Dispatch } from "react";
+
 export default function CreatePostForm(props: {
-  formData: any;
-  setFormData: any;
+  formData: {
+    locationName: string;
+    title: string;
+    textContent: string;
+    postedTime: string;
+  };
+  setFormData: Dispatch<{
+    locationName: string;
+    title: string;
+    textContent: string;
+    postedTime: string;
+  }>;
 }) {
   const { formData, setFormData } = props;
 
