@@ -1,65 +1,66 @@
-import { writeFile, readFile, unlink, readdir } from "fs/promises";
-import ImageCache from "@/backend/image-cache";
-import { basename } from "path";
+import { writeFile, readFile, unlink, readdir } from 'fs/promises';
+import ImageCache from '@/backend/image-cache';
+import { basename } from 'path';
 
 const bucketPath = process.env.UPLOADS_PATH || '/usr/share/uploads';
 const imagePath = `${bucketPath}/images`;
 
 type UploadedFile = {
-    file: File;
-    owner: number;
+  file: File;
+  owner: number;
 };
 
 async function ifImageExists(id: string) {
-    const files = await readdir(imagePath);
-    return files.find((file) => basename(file) === id);
+  const files = await readdir(imagePath);
+  return files.find((file) => basename(file) === id);
 }
 
 export async function uploadNewImage(image: UploadedFile) {
-    const { file, owner } = image;
+  const { file, owner } = image;
 
-    if (!file.type.includes('image')) {
-        throw new Error('Invalid file type');
-    }
+  if (!file.type.includes('image')) {
+    return undefined;
+  }
 
-    const suffix = file.type.split('/')[1];
+  const suffix = file.type.split('/')[1];
 
-    let file_id = `${owner}_${Date.now()}`;
-    while (await ifImageExists(file_id)) {
-        file_id = `${owner}_${Date.now()}`;
-    }
+  let file_id = `${owner}_${Date.now()}`;
+  while (await ifImageExists(file_id)) {
+    file_id = `${owner}_${Date.now()}`;
+  }
 
-    const buffer = Buffer.from(await file.arrayBuffer())
-    writeFile(`${imagePath}/${file_id}.${suffix}`, buffer);
-    ImageCache.insert(file_id, file);
-    return file_id;
+  const buffer = Buffer.from(await file.arrayBuffer());
+  writeFile(`${imagePath}/${file_id}.${suffix}`, buffer);
+  ImageCache.insert(file_id, file);
+  return file_id;
 }
 
 export async function collectImage(id: string) {
-    const cacheResult = ImageCache.query(id);
-    if (cacheResult) {
-        return cacheResult;
-    }
+  const cacheResult = ImageCache.query(id);
+  if (cacheResult) {
+    return cacheResult;
+  }
 
-    const imageFile = await ifImageExists(id);
-    if (!imageFile) {
-        return undefined;
-    }
+  const imageFile = await ifImageExists(id);
+  if (!imageFile) {
+    return undefined;
+  }
 
-    const ext = imageFile.split('.').pop();
-    const buffer = await readFile(`${imagePath}/${imageFile}`);
-    const file = new File([buffer], imageFile, { type: `image/${ext}` });
-    ImageCache.insert(id, file);
-    return file;
+  const ext = imageFile.split('.').pop();
+  const buffer = await readFile(`${imagePath}/${imageFile}`);
+  const file = new File([buffer], imageFile, { type: `image/${ext}` });
+  ImageCache.insert(id, file);
+  return file;
 }
 
 export async function deleteImage(id: string) {
-    ImageCache.delete(id);
+  ImageCache.delete(id);
 
-    const imageFile = await ifImageExists(id);
-    if (!imageFile) {
-        return;
-    }
+  const imageFile = await ifImageExists(id);
+  if (!imageFile) {
+    return { success: false };
+  }
 
-    return unlink(`${imagePath}/${id}`);
+  await unlink(`${imagePath}/${id}`);
+  return { success: true };
 }

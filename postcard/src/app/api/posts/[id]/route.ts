@@ -2,6 +2,7 @@ import pool from '@/backend/cloudsql';
 import { NextRequest } from 'next/server';
 import { asReadablePostQuery } from '@/backend/posts';
 import { authorizeSession, DBSession } from '../../auth/config';
+import { deleteImage } from '@/backend/bucket';
 
 export async function GET(
   _: NextRequest,
@@ -85,5 +86,10 @@ export async function DELETE(
     return Response.json({ error: 'Post not found' }, { status: 404 });
   }
 
+  const fileId = query.rows[0].imageContent;
+  if (fileId) {
+    await deleteImage(fileId);
+  }
+  
   return Response.json(query.rows[0], { status: 200 });
 }
