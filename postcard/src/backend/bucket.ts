@@ -1,9 +1,9 @@
 import { writeFile, readFile, unlink, readdir } from 'fs/promises';
 import ImageCache from '@/backend/image-cache';
-import { basename } from 'path';
+import { resolve } from 'path';
 
 const bucketPath = process.env.UPLOADS_PATH || '/usr/share/uploads';
-const imagePath = `${bucketPath}/images`;
+const imagePath = resolve(process.cwd(), `${bucketPath}/images`);
 
 type UploadedFile = {
   file: File;
@@ -12,7 +12,11 @@ type UploadedFile = {
 
 async function ifImageExists(id: string) {
   const files = await readdir(imagePath);
-  return files.find((file) => basename(file) === id);
+  const foundFile = files.find((file) => {
+    const basename = file.substring(0, file.lastIndexOf('.'));
+    return basename === id
+  });
+  return foundFile;
 }
 
 export async function uploadNewImage(image: UploadedFile) {
@@ -38,6 +42,7 @@ export async function uploadNewImage(image: UploadedFile) {
 export async function collectImage(id: string) {
   const cacheResult = ImageCache.query(id);
   if (cacheResult) {
+    console.log('pulling from cache...', cacheResult);
     return cacheResult;
   }
 
