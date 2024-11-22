@@ -11,16 +11,6 @@ async function getPool() {
     connectionTimeoutMillis: 2000,
   });
 
-  console.log(
-    'db stuff',
-    process.env.DATABASE_HOST,
-    process.env.DATABASE_USER,
-    process.env.DATABASE_PASSWORD,
-    process.env.DATABASE_NAME
-  );
-  console.log('maps stuff', process.env.NEXT_PUBLIC_GMP_MAP_ID, process.env.NEXT_PUBLIC_GMP_API_KEY);
-  console.log('env', process.env);
-
   return pool;
 }
 
