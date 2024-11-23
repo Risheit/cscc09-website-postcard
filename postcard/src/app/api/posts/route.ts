@@ -50,11 +50,11 @@ export async function GET(req: NextRequest) {
 
 const createPostSchema = zfd.formData({
   textContent: zfd.text(z.string().optional()),
-  image: zfd.file(),
+  image: zfd.file(z.instanceof(File).optional()),
   locationName: zfd.text(),
   lat: zfd.numeric(),
   lng: zfd.numeric(),
-  postedTime: zfd.text(z.string().datetime()),
+  postedTime: zfd.text(),
   title: zfd.text(z.string().optional()),
 });
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
       const parseResult = createPostSchema.safeParse(formData);
       if (!parseResult.success) {
-        return Response.json({ error: 'Invalid form data' }, { status: 400 });
+        return Response.json({ error: parseResult.error.issues }, { status: 400 });
       }
 
       const { textContent, image, locationName, lat, lng, postedTime, title } =
@@ -82,9 +82,12 @@ export async function POST(req: NextRequest) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });
       }
 
-      const fileId = await uploadNewImage({ file: image, owner: userId });
-      if (!fileId) {
-        return Response.json({ error: 'Invalid image' }, { status: 400 });
+      let fileId: string | undefined;
+      if (image) {
+        fileId = await uploadNewImage({ file: image, owner: 2 });
+        if (!fileId) {
+          return Response.json({ error: 'Invalid image' }, { status: 400 });
+        }
       }
 
       const query = await pool.query(
@@ -96,7 +99,7 @@ export async function POST(req: NextRequest) {
         [
           title ?? null,
           textContent ?? null,
-          fileId,
+          fileId ?? null,
           locationName,
           lng,
           lat,

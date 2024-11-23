@@ -31,7 +31,7 @@ export async function GET(
 
 const createPostSchema = zfd.formData({
   textContent: zfd.text(z.string().optional()),
-  image: zfd.file(),
+  image: zfd.file(z.instanceof(File).optional()),
   locationName: zfd.text(),
   lat: zfd.numeric(),
   lng: zfd.numeric(),
@@ -67,9 +67,12 @@ export async function POST(
       const { textContent, image, locationName, lat, lng, postedTime, title } =
         parseResult.data;
 
-      const fileId = await uploadNewImage({ file: image, owner: userId });
-      if (!fileId) {
-        return Response.json({ error: 'Invalid image' }, { status: 400 });
+      let fileId: string | undefined;
+      if (image) {
+        fileId = await uploadNewImage({ file: image, owner: userId });
+        if (!fileId) {
+          return Response.json({ error: 'Invalid image' }, { status: 400 });
+        }
       }
 
       const query = await pool.query(
@@ -81,7 +84,7 @@ export async function POST(
         [
           title ?? null,
           textContent ?? null,
-          fileId,
+          fileId ?? null,
           locationName,
           lng,
           lat,

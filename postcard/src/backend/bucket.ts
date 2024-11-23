@@ -35,7 +35,8 @@ export async function uploadNewImage(image: UploadedFile) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   writeFile(`${imagePath}/${file_id}.${suffix}`, buffer);
-  ImageCache.insert(file_id, file);
+  const cached = new File([buffer], `${file_id}.${suffix}`, { type: file.type });
+  ImageCache.insert(file_id, cached);
   return file_id;
 }
 
