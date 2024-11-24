@@ -4,6 +4,9 @@ import { QueryResult } from 'pg';
 import { getUserByUsername } from '@/backend/users';
 import { authorizeSession, DBSession } from '@/app/api/auth/config';
 import { asReadablePostQuery } from '@/backend/posts';
+import { z } from 'zod';
+import { zfd } from 'zod-form-data';
+import { uploadNewImage } from '@/backend/bucket';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -45,36 +48,67 @@ export async function GET(req: NextRequest) {
   });
 }
 
+const createPostSchema = zfd.formData({
+  textContent: zfd.text(z.string().optional()),
+  image: zfd.file(z.instanceof(File).optional()),
+  locationName: zfd.text(),
+  lat: zfd.numeric(),
+  lng: zfd.numeric(),
+  postedTime: zfd.text(),
+  title: zfd.text(z.string().optional()),
+});
+
 export async function POST(req: NextRequest) {
-  const session = (await authorizeSession()) as DBSession;
-  if (!session) {
-    return Response.json({ error: 'Unauthorized' }, { status: 405 });
-  }
+  const sessionPromise = authorizeSession();
+  const formDataPromise = req.formData();
 
-  const { textContent, imagePath, locationName, lat, lng, postedTime, title } =
-    await req.json();
+  return Promise.all([sessionPromise, formDataPromise]).then(
+    async ([session, formData]) => {
+      const dbSession = session as DBSession;
+      if (!dbSession) {
+        return Response.json({ error: 'Unauthorized' }, { status: 405 });
+      }
 
-  if (!lat || !lng || !postedTime || !locationName) {
-    return Response.json({ error: 'Missing required fields' }, { status: 400 });
-  }
+      const parseResult = createPostSchema.safeParse(formData);
+      if (!parseResult.success) {
+        return Response.json({ error: parseResult.error.issues }, { status: 400 });
+      }
 
-  const query = await pool.query(
-    `INSERT INTO posts (title, text_content, image_content, location_name, location,
-      owner, posted_time, num_comments)
-    VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
-      $7::integer, $8::timestamp, 0)
-    RETURNING ${asReadablePostQuery}`,
-    [
-      title ?? null,
-      textContent ?? null,
-      imagePath ?? null,
-      locationName,
-      lng,
-      lat,
-      session.account?.userId,
-      postedTime,
-    ]
+      const { textContent, image, locationName, lat, lng, postedTime, title } =
+        parseResult.data;
+
+      const userId = dbSession.account?.userId;
+      if (!userId) {
+        return Response.json({ error: 'Unauthorized' }, { status: 405 });
+      }
+
+      let fileId: string | undefined;
+      if (image) {
+        fileId = await uploadNewImage({ file: image, owner: 2 });
+        if (!fileId) {
+          return Response.json({ error: 'Invalid image' }, { status: 400 });
+        }
+      }
+
+      const query = await pool.query(
+        `INSERT INTO posts (title, text_content, image_content, location_name, location,
+          owner, posted_time, num_comments)
+          VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
+          $7::integer, $8::timestamp, 0)
+          RETURNING ${asReadablePostQuery}`,
+        [
+          title ?? null,
+          textContent ?? null,
+          fileId ?? null,
+          locationName,
+          lng,
+          lat,
+          dbSession.account?.userId,
+          postedTime,
+        ]
+      );
+
+      return Response.json(query.rows[0], { status: 200 });
+    }
   );
-
-  return Response.json(query.rows[0], { status: 200 });
 }

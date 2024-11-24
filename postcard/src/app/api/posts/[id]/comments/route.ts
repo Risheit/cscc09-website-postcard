@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import pool from '@/backend/cloudsql';
 import { authorizeSession, DBSession } from '@/app/api/auth/config';
 import { asReadablePostQuery } from '@/backend/posts';
+import { zfd } from 'zod-form-data';
+import { z } from 'zod';
+import { uploadNewImage } from '@/backend/bucket';
 
 export async function GET(
   req: NextRequest,
@@ -26,49 +29,79 @@ export async function GET(
   });
 }
 
+const createPostSchema = zfd.formData({
+  textContent: zfd.text(z.string().optional()),
+  image: zfd.file(z.instanceof(File).optional()),
+  locationName: zfd.text(),
+  lat: zfd.numeric(),
+  lng: zfd.numeric(),
+  postedTime: zfd.text(z.string().datetime()),
+  title: zfd.text(z.string().optional()),
+});
+
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params: paramsPromise }: { params: Promise<{ id: string }> }
 ) {
-  const session = (await authorizeSession()) as DBSession;
-  if (!session) {
-    return Response.json({ error: 'Unauthorized' }, { status: 405 });
-  }
+  const sessionPromise = authorizeSession();
+  const formDataPromise = req.formData();
 
-  const { textContent, imagePath, locationName, lat, lng, postedTime, title } =
-    await req.json();
-  const { id } = await params;
+  return Promise.all([sessionPromise, paramsPromise, formDataPromise]).then(
+    async ([session, params, formData]) => {
+      const dbSession = session as DBSession;
+      const { id } = params;
+      if (!dbSession) {
+        return Response.json({ error: 'Unauthorized' }, { status: 405 });
+      }
 
+      const userId = dbSession.account?.userId;
+      if (!userId) {
+        return Response.json({ error: 'Unauthorized' }, { status: 405 });
+      }
 
-  if (!lat || !lng || !postedTime || !locationName) {
-    return Response.json({ error: 'Missing required fields' }, { status: 400 });
-  }
+      const parseResult = createPostSchema.safeParse(formData);
+      if (!parseResult.success) {
+        return Response.json({ error: 'Invalid form data' }, { status: 400 });
+      }
 
-  const query = await pool.query(
-    `INSERT INTO posts (text_content, image_content, location_name, location,
-      comment_of, owner, posted_time, num_comments)
-    VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
-      $7::integer, $8::integer, $9::timestamp, 0)
-    RETURNING ${asReadablePostQuery}`,
-    [
-      title ?? null,
-      textContent ?? null,
-      imagePath ?? null,
-      locationName,
-      lng,
-      lat,
-      id,
-      session.account?.userId,
-      postedTime,
-    ]
+      const { textContent, image, locationName, lat, lng, postedTime, title } =
+        parseResult.data;
+
+      let fileId: string | undefined;
+      if (image) {
+        fileId = await uploadNewImage({ file: image, owner: userId });
+        if (!fileId) {
+          return Response.json({ error: 'Invalid image' }, { status: 400 });
+        }
+      }
+
+      const query = await pool.query(
+        `INSERT INTO posts (text_content, image_content, location_name, location,
+          comment_of, owner, posted_time, num_comments)
+          VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
+          $7::integer, $8::integer, $9::timestamp, 0)
+          RETURNING ${asReadablePostQuery}`,
+        [
+          title ?? null,
+          textContent ?? null,
+          fileId ?? null,
+          locationName,
+          lng,
+          lat,
+          id,
+          userId,
+          postedTime,
+        ]
+      );
+
+      if (query.rows.length !== 0) {
+        await pool.query(
+          `UPDATE posts SET num_comments = num_comments + 1 WHERE id = $1::integer`,
+          [id]
+        );
+      }
+
+      return Response.json(query.rows[0], { status: 200 });
+    }
   );
-
-  if (query.rows.length !== 0) {
-    await pool.query(
-      `UPDATE posts SET num_comments = num_comments + 1 WHERE id = $1::integer`,
-      [id]
-    );
-  }
-
-  return Response.json(query.rows[0], { status: 200 });
 }
