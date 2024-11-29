@@ -7,7 +7,7 @@ const imagePath = resolve(process.cwd(), `${bucketPath}/images`);
 
 type UploadedFile = {
   file: File;
-  owner: number;
+  owner: string;
 };
 
 async function ifImageExists(id: string) {

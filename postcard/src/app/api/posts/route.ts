@@ -2,11 +2,12 @@ import { NextRequest } from 'next/server';
 import pool from '@/backend/cloudsql';
 import { QueryResult } from 'pg';
 import { getUserByUsername } from '@/backend/users';
-import { authorizeSession, DBSession } from '@/app/api/auth/config';
+import { authorizeSession } from '@/app/api/auth/config';
 import { asReadablePostQuery } from '@/backend/posts';
 import { z } from 'zod';
 import { zfd } from 'zod-form-data';
 import { uploadNewImage } from '@/backend/bucket';
+import DbSession from '@/app/models/DbSession';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -26,16 +27,21 @@ export async function GET(req: NextRequest) {
   if (!x || !y) {
     query = await pool.query(
       `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name,
-      users.profile_pic as poster_profile_pic
-      FROM posts JOIN users on owner = users.id
-      WHERE 1=1 ${ownerCondition}
-      ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint`,
+        users.profile_pic as poster_profile_pic
+       FROM posts 
+       JOIN users on owner = users.id
+       LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
+       WHERE comment_of is NULL
+       ${ownerCondition}
+       ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint
+      `,
       [limit, offset]
     );
   } else {
     query = await pool.query(
       `SELECT ${asReadablePostQuery} FROM posts
       WHERE ST_DWithin(posts.location, ST_MakePoint($1::decimal,$2::decimal)::geography, $3::decimal)
+      AND comment_of is NULL
       ${ownerCondition}
       ORDER BY posts.location <-> ST_MakePoint($1::decimal,$2::decimal)::geography, created DESC
       LIMIT $4::bigint OFFSET $5::bigint`,
@@ -64,27 +70,30 @@ export async function POST(req: NextRequest) {
 
   return Promise.all([sessionPromise, formDataPromise]).then(
     async ([session, formData]) => {
-      const dbSession = session as DBSession;
+      const dbSession = session as DbSession;
       if (!dbSession) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });
       }
 
       const parseResult = createPostSchema.safeParse(formData);
       if (!parseResult.success) {
-        return Response.json({ error: parseResult.error.issues }, { status: 400 });
+        return Response.json(
+          { error: parseResult.error.issues },
+          { status: 400 }
+        );
       }
 
       const { textContent, image, locationName, lat, lng, postedTime, title } =
         parseResult.data;
 
-      const userId = dbSession.account?.userId;
+      const userId = dbSession.dbUser?.id;
       if (!userId) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });
       }
 
       let fileId: string | undefined;
       if (image) {
-        fileId = await uploadNewImage({ file: image, owner: 2 });
+        fileId = await uploadNewImage({ file: image, owner: userId });
         if (!fileId) {
           return Response.json({ error: 'Invalid image' }, { status: 400 });
         }
@@ -103,7 +112,7 @@ export async function POST(req: NextRequest) {
           locationName,
           lng,
           lat,
-          dbSession.account?.userId,
+          userId,
           postedTime,
         ]
       );

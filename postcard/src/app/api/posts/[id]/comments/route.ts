@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
 import pool from '@/backend/cloudsql';
-import { authorizeSession, DBSession } from '@/app/api/auth/config';
+import { authorizeSession } from '@/app/api/auth/config';
 import { asReadablePostQuery } from '@/backend/posts';
 import { zfd } from 'zod-form-data';
 import { z } from 'zod';
 import { uploadNewImage } from '@/backend/bucket';
+import DbSession from '@/app/models/DbSession';
 
 export async function GET(
   req: NextRequest,
@@ -48,13 +49,13 @@ export async function POST(
 
   return Promise.all([sessionPromise, paramsPromise, formDataPromise]).then(
     async ([session, params, formData]) => {
-      const dbSession = session as DBSession;
+      const dbSession = session as DbSession;
       const { id } = params;
       if (!dbSession) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });
       }
 
-      const userId = dbSession.account?.userId;
+      const userId = dbSession.dbUser?.id;
       if (!userId) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });
       }
@@ -79,7 +80,7 @@ export async function POST(
         `INSERT INTO posts (text_content, image_content, location_name, location,
           comment_of, owner, posted_time, num_comments)
           VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
-          $7::integer, $8::integer, $9::timestamp, 0)
+          $7::integer, $8::text, $9::timestamp, 0)
           RETURNING ${asReadablePostQuery}`,
         [
           title ?? null,
