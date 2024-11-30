@@ -5,6 +5,7 @@ import DisplayName from '@/app/components/Account/DisplayName/DisplayName';
 import ProfilePicture from '@/app/components/Account/ProfilePicture/ProfilePicture';
 import useDbSession from '@/app/hooks/useDbSession';
 import { User } from '@/backend/users';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -44,7 +45,7 @@ export default function Page({ params }: { params: { id: string } }) {
       )}
       {isLoading && (
         <div className="flex justify-center items-center h-full w-full">
-          <img
+          <Image
             src="/static/loading.svg"
             alt="loading..."
             className="w-20 h-20 mt-20 opacity-50"

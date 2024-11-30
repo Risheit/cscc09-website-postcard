@@ -93,7 +93,7 @@ function createPatchQuery(
 
   let values = [id];
   const valueMappings = Object.entries(data)
-    .filter(([_, param]) => param !== undefined && param !== null)
+    .filter((param) => param[1] !== undefined && param[1] !== null)
     .map(([key, val], idx) => {
       let column = '';
       switch (key) {

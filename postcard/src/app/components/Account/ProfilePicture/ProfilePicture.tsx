@@ -1,7 +1,8 @@
 import { User } from '@/backend/users';
 import { faPen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ChangeEvent, use, useRef, useState } from 'react';
+import Image from 'next/image';
+import { ChangeEvent, useRef, useState } from 'react';
 
 export default function ProfilePicture(props: {
   user?: User;
@@ -33,7 +34,7 @@ export default function ProfilePicture(props: {
         onChange={handleProfilePictureChange}
         hidden
       />
-      <img
+      <Image
         src={user?.profilePicturePath ?? '/static/default_profile.jpg'}
         alt="profile"
         className={`rounded-full object-cover min-w-64 w-64 min-h-64 h-64 col-start-1 row-start-1 bg-black ${

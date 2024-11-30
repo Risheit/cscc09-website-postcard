@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 
 import { Post } from '@/app/models/post';
 import { Dispatch, useState } from 'react';
+import Image from 'next/image';
 
 function upvoted(post: Post): Post {
   switch (post.local_liked_status) {
@@ -129,7 +130,7 @@ export default function Dashboard(props: {
               className="flex place-items-center"
             >
               {post.poster_profile_pic ? (
-                <img
+                <Image
                   src={post.poster_profile_pic}
                   alt="profile"
                   className="rounded-full w-6"
@@ -183,7 +184,7 @@ export default function Dashboard(props: {
               className="bg-slate-50 p-2 w-full rounded-sm"
             >
               {/* TODO: get images to work */}
-              <img
+              <Image
                 src={post.image_content}
                 alt={post.title}
                 className="shadow-sm mb-2"

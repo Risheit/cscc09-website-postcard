@@ -1,4 +1,3 @@
-import { QueryResult } from 'pg';
 import pool from './cloudsql';
 
 export type Room = {
@@ -25,9 +24,13 @@ export async function getImageConnectedToRoom(roomId: string) {
 }
 
 export async function createRoom(fileId?: string) {
-  let roomRaw: QueryResult<any | undefined> | undefined;
+  let roomId = crypto.randomUUID();
+  let roomRaw = await pool.query(
+    'INSERT INTO rooms (id, image_content) VALUES ($1::text, $2::text) ON CONFLICT (id) DO NOTHING RETURNING *',
+    [roomId, fileId]
+  );
   while (!roomRaw?.rows[0]) {
-    const roomId = crypto.randomUUID();
+    roomId = crypto.randomUUID();
     roomRaw = await pool.query(
       'INSERT INTO rooms (id, image_content) VALUES ($1::text, $2::text) ON CONFLICT (id) DO NOTHING RETURNING *',
       [roomId, fileId]

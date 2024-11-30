@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useDbSession from "@/app/hooks/useDbSession";
+import Image from "next/image";
 
 
 export default function Header() {
@@ -79,7 +80,7 @@ export default function Header() {
           <Link href="/account" className="h-full flex place-items-center">
             <span className="aspect-square h-full flex items-center justify-center rounded-full overflow-hidden">
               {session.data?.dbUser?.profilePicturePath ? (
-                <img
+                <Image
                   src={session.data?.dbUser?.profilePicturePath}
                   alt="profile"
                   className="rounded-full w-6"

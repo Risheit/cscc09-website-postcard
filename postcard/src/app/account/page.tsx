@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import DisplayName from '../components/Account/DisplayName/DisplayName';
 import AboutMe from '../components/Account/AboutMe/AboutMe';
 import ProfilePicture from '../components/Account/ProfilePicture/ProfilePicture';
+import Image from 'next/image';
 
 export default function Page() {
   const session = useDbSession();
@@ -64,7 +65,7 @@ export default function Page() {
       )}
       {isLoading && (
         <div className="flex justify-center items-center h-full w-full">
-          <img
+          <Image
             src="/static/loading.svg"
             alt="loading..."
             className="w-20 h-20 mt-20 opacity-50"
