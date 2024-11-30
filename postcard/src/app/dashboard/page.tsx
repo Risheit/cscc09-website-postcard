@@ -31,7 +31,7 @@ export default function Page() {
   const DASHBOARD_MAP_ID = 'postcard-map';
 
   useEffect(() => {
-    // The google maps API isn't finding a key. This is a debug log to check if the key is 
+    // The google maps API isn't finding a key. This is a debug log to check if the key is
     // being passed into the client correctly.
     console.log('GMP_MAP_ID', process.env.NEXT_PUBLIC_GMP_MAP_ID);
     console.log('GMP_API_KEY', process.env.NEXT_PUBLIC_GMP_API_KEY);
