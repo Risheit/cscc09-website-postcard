@@ -118,7 +118,7 @@ export async function DELETE(
 
   const fileId = query.rows[0].imageContent;
   if (fileId) {
-    await deleteImage(fileId);
+    deleteImage(fileId);
   }
 
   return Response.json(query.rows[0], { status: 200 });

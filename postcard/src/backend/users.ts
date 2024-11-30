@@ -3,6 +3,8 @@ import pool from '@/backend/cloudsql';
 export type User = {
   id: string;
   displayName: string;
+  aboutMe: string;
+  externalProfilePic: boolean;
   profilePicturePath?: string;
 };
 
@@ -26,12 +28,24 @@ function fromRawUser(userRaw?: {
   id: string;
   display_name: string;
   profile_pic: string;
+  external_profile_pic: boolean;
+  about_me: string;
 }) {
+  const internalProfilePicPath =
+    userRaw?.profile_pic.trim() !== ''
+      ? `/api/images/${userRaw?.profile_pic}`
+      : undefined;
+
+  console.log('internalProfilePicPath', internalProfilePicPath);
   return userRaw
     ? ({
-        id: userRaw?.id,
-        displayName: userRaw?.display_name,
-        profilePicturePath: userRaw?.profile_pic,
+        id: userRaw.id,
+        displayName: userRaw.display_name,
+        aboutMe: userRaw.about_me,
+        externalProfilePic: userRaw.external_profile_pic,
+        profilePicturePath: userRaw?.external_profile_pic
+          ? userRaw.profile_pic
+          : internalProfilePicPath,
       } as User)
     : undefined;
 }
@@ -44,10 +58,10 @@ function fromRawAccount(accountRaw?: {
 }) {
   return accountRaw
     ? ({
-        username: accountRaw?.username,
-        credentials: accountRaw?.credentials,
-        isOAuth: accountRaw?.is_oauth,
-        userId: accountRaw?.user_id,
+        username: accountRaw.username,
+        credentials: accountRaw.credentials,
+        isOAuth: accountRaw.is_oauth,
+        userId: accountRaw.user_id,
       } as Account)
     : undefined;
 }
@@ -75,14 +89,16 @@ export async function getUserById(id: string) {
 export async function addUser(
   id: string,
   displayName: string,
-  profilePic?: string
+  profilePic?: string,
+  profilePicSource: 'external' | 'internal' = 'internal'
 ) {
   const userRaw = await pool.query(
-    `INSERT INTO users (id, display_name, profile_pic) VALUES ($1::text, $2::text, $3::text)
+    `INSERT INTO users (id, display_name, profile_pic, external_profile_pic)
+     VALUES ($1::text, $2::text, $3::text, $4::boolean)
      ON CONFLICT DO NOTHING
      RETURNING *
     `,
-    [id, displayName, profilePic ?? '']
+    [id, displayName, profilePic ?? '', profilePicSource === 'external']
   );
 
   const user = userRaw.rows[0];

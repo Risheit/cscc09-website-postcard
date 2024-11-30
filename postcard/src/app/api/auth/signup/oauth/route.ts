@@ -2,7 +2,6 @@ import {
   addUser,
   attachAccountToUser,
   getAccountByUsername,
-  getUserById,
 } from '@/backend/users';
 import { NextRequest } from 'next/server';
 
@@ -18,7 +17,7 @@ export async function PUT(req: NextRequest) {
     return Response.json({ error: 'account already exists' }, { status: 409 });
   }
 
-  let user = await addUser(displayName, displayName, profilePicture);
+  let user = await addUser(displayName, displayName, profilePicture, 'external');
   if (!user) {
     return Response.json({ error: 'Username already exists' }, { status: 409 });
   }

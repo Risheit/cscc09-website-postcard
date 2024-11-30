@@ -6,6 +6,8 @@ import { signIn } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+const testWhitespace = /\s/g;
+
 function withQueryParams(url: string, params: { [key: string]: string }) {
   const searchParams = new URLSearchParams(params).toString();
   return `${url}?${searchParams}`;
@@ -17,6 +19,8 @@ function getErrorMessage(error: string) {
       return 'Unable to connect this account with an OAuth provider. Please retry the sign in process.';
     case 'account_exists':
       return 'An account with this username already exists. Please use a different username.';
+    case 'malformed_fields':
+      return "There's an issue with the username or password. Username and password fields may not have any spaces.";
     default:
       return 'An error occurred when creating this account. Please try again later.';
   }
@@ -34,7 +38,8 @@ export default function Page({
   const provider = searchParams?.provider;
   const isOAuth = provider !== undefined;
   const imagePath = searchParams?.image;
-  const defaultDisplayName = searchParams?.name ?? '';
+  const defaultDisplayName =
+    searchParams?.name?.replace(testWhitespace, '') ?? '';
   const redirectUrl = searchParams?.redirect ?? '/';
   const returnUrl = searchParams?.return ?? '/api/auth/signin';
   const signUpMessage = isOAuth ? 'complete sign up' : 'create account';
@@ -87,12 +92,35 @@ export default function Page({
   const handleSubmit = async () => {
     setIsRequesting(true);
     if (isOAuth && !userId) {
-      router.replace(withQueryParams(path, { ...searchParams, error: 'missing_user' }));
+      router.replace(
+        withQueryParams(path, { ...searchParams, error: 'missing_user' })
+      );
     }
 
     const response = await handleFetch();
     if (response.status == 409) {
-      router.replace(withQueryParams(path, { ...searchParams, error: 'account_exists' }));
+      router.replace(
+        withQueryParams(path, { ...searchParams, error: 'account_exists' })
+      );
+      setIsRequesting(false);
+      return;
+    }
+
+    if (response.status == 400) {
+      router.replace(
+        withQueryParams(path, { ...searchParams, error: 'malformed_fields' })
+      );
+      setIsRequesting(false);
+      return;
+    }
+
+    if (response.status != 200) {
+      router.replace(
+        withQueryParams(path, {
+          ...searchParams,
+          error: 'generic',
+        })
+      );
       setIsRequesting(false);
       return;
     }
