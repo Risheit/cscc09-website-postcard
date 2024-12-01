@@ -10,8 +10,8 @@ export default function Layout({
     <WebSocketProvider
       url={
         process.env.NODE_ENV === "production"
-          ? `wss://${process.env.NEXTAUTH_URL}/api/ws`
-          : `ws://${process.env.NEXTAUTH_URL}/api/ws`
+          ? `wss://${process.env.NEXT_PUBLIC_BASEURL}/api/ws`
+          : `ws://${process.env.NEXT_PUBLIC_BASEURL}/api/ws`
       }
     >
       {children}
