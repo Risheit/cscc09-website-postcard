@@ -16,8 +16,8 @@ import { PoiMarker } from './marker';
 import CreatePostForm from '@/app/components/CreatePostForm/CreatePostForm';
 import { useRouter } from 'next/navigation';
 
-const SimpleCanvasV2 = dynamic(
-  () => import("@/app/components/SimpleCanvasV3/SimpleCanvasV3"),
+const SimpleCanvasV3 = dynamic(
+  () => import('@/app/components/SimpleCanvasV3/SimpleCanvasV3'),
   {
     ssr: false,
   }
@@ -28,6 +28,7 @@ export default function Page() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isImagePost, setIsImagePost] = useState(true);
   const [cameraLocation, setCameraLocation] = useState({ lat: 0, lng: 0 });
+  const [canvasState, setCanvasState] = useState<Blob | null>(null);
 
   const [poi, setPoi] = useState({
     key: 'poi',
@@ -35,7 +36,6 @@ export default function Page() {
   });
 
   const [file, setFile] = useState<File | null>(null);
-
   const [data, setData] = useState({
     locationName: '',
     title: '',
@@ -65,7 +65,7 @@ export default function Page() {
     }
   }, []);
 
-  const submitPost = () => {
+  const submitPost = async () => {
     console.log('submitting post...');
     console.log(data);
 
@@ -73,25 +73,24 @@ export default function Page() {
     if (data.textContent) {
       formData.append('textContent', data.textContent);
     }
-    if (file) {
-      formData.append('image', file);
+
+    if (canvasState) {
+      formData.append('image', canvasState);
     }
+
     formData.append('locationName', data.locationName);
     formData.append('lat', poi.location.lat.toString());
     formData.append('lng', poi.location.lng.toString());
     formData.append('postedTime', data.postedTime);
     formData.append('title', data.title);
     console.log('Data to be sent: ', formData);
-
-    fetch('/api/posts', {
+    const res = await fetch('/api/posts', {
       method: 'POST',
       body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('Post submitted: ', data);
-        router.push('/dashboard');
-      });
+    });
+    const json = await res.json();
+    console.log('Post submitted: ', json);
+    router.push('/dashboard');
   };
 
   return (
@@ -232,7 +231,11 @@ export default function Page() {
         style={{ display: secondStep && isImagePost ? 'block' : 'none' }}
         className="flex w-full place-items-center"
       >
-        <SimpleCanvasV2 file={file} setFile={setFile} />
+        <SimpleCanvasV3
+          file={file}
+          setFile={setFile}
+          setCanvasState={setCanvasState}
+        />
       </div>
 
       {secondStep && <CreatePostForm formData={data} setFormData={setData} />}

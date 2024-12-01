@@ -40,11 +40,11 @@ export default function PostModal(props: {
 
   return isPostOpen && selectedPost ? (
     <Modal show={isPostOpen} onHide={handleCloseModal} centered>
-      <div className="grid grid-cols-2 gap-8 bg-background-200 rounded-lg overflow-hidden shadow-md min-h-[80vh] min-w-[90vw]">
-        <div className="flex flex-col gap-2 place-self-center pl-8 w-full">
+      <div className="grid grid-cols-2 bg-background-200 rounded-lg overflow-hidden shadow-md min-h-[80vh] min-w-[90vw]">
+        <div className="flex flex-col gap-2 place-self-center w-full p-10">
           {selectedPost.image_content ? (
             <div
-              className="flip-container"
+              className="flip-container w-fit"
               onClick={() => {
                 const parentDiv = document.querySelector('.flip-container');
                 if (parentDiv) {
@@ -52,23 +52,22 @@ export default function PostModal(props: {
                 }
               }}
             >
-              <div className="front bg-slate-50 p-2 rounded-sm flex flex-col h-auto select-none">
-                {/* TODO: get images to work */}
+              <div className="front bg-slate-50 p-2 rounded-md flex h-auto flex-col select-none w-fit">
                 <img
                   src={`/api/images/${selectedPost.image_content}`}
                   alt={selectedPost.title}
-                  className="shadow-sm mb-2"
+                  className="shadow-sm mb-2 self-center max-h-[70vh] h-auto"
                 />
                 <span className="h-4 bg-slate-50 text-black mb-2">
                   {selectedPost.title}
                 </span>
               </div>
 
-              <div className="back bg-slate-50 p-2 rounded-sm flex flex-col h-auto select-none">
+              <div className="back bg-slate-50 p-2 rounded-md flex h-auto flex-col select-none w-fit">
                 <img
                   src={`/api/images/${selectedPost.image_content}`}
                   alt={selectedPost.title}
-                  className="shadow-sm mb-2"
+                  className="shadow-sm mb-2 self-center max-h-[70vh] h-auto invisible"
                 />
                 <span className="h-4 bg-slate-50 text-black mb-2 invisible">
                   {selectedPost.title}
