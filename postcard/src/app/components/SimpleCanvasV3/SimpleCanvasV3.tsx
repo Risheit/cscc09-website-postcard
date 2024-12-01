@@ -374,7 +374,6 @@ export default function SimpleCanvasV3(props: {
         newCtx.drawImage(img, 0, 0, canvasSize.width, canvasSize.height);
         drawOldCanvas();
       };
-      img;
     } else {
       newCtx.fillStyle = '#000000';
       newCtx.fillRect(0, 0, canvasSize.width, canvasSize.height);
