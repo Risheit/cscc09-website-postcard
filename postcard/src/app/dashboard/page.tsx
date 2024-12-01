@@ -24,7 +24,10 @@ export default function Page() {
   useEffect(() => {
     fetch('/api/posts').then(async (res) => {
       const p = await res.json();
-      setPosts(p);
+      console.log('gotten', p);
+      const setupPosts = p.map((post: { action: any; }) => { return { ...post, local_liked_status: post.action }; });
+      console.log('setup', setupPosts);
+      setPosts(setupPosts);
     });
   }, []);
 
