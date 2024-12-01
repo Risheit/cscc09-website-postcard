@@ -1,8 +1,8 @@
-import { Dispatch, useCallback, useEffect, useRef, useState } from "react";
-import { Stage, Layer, Line } from "react-konva";
-import "./SimpleCanvasV3.css";
+import { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
+import { Stage, Layer, Line } from 'react-konva';
+import './SimpleCanvasV3.css';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCancel,
   faPencil,
@@ -14,14 +14,14 @@ import {
   faRedo,
   faUpload,
   faSave,
-} from "@fortawesome/free-solid-svg-icons";
-import { KonvaEventObject, Node, NodeConfig } from "konva/lib/Node";
-import { Message } from "./WebSocketComponent/WebSocketComponent";
-import { useWebSocket } from "next-ws/client";
-import useDbSession from "@/app/hooks/useDbSession";
-import { randomBytes } from "crypto";
+} from '@fortawesome/free-solid-svg-icons';
+import { KonvaEventObject, Node, NodeConfig } from 'konva/lib/Node';
+import { Message } from './WebSocketComponent/WebSocketComponent';
+import { useWebSocket } from 'next-ws/client';
+import useDbSession from '@/app/hooks/useDbSession';
+import { randomBytes } from 'crypto';
 
-type Tool = "brush" | "eraser";
+type Tool = 'brush' | 'eraser';
 type DrawingLine = {
   id: string;
   tool: Tool;
@@ -33,24 +33,25 @@ type DrawingLine = {
 type Colour = string; // hex, e.g. "#000000"
 
 export default function SimpleCanvasV3(props: {
+  setCanvasState: Dispatch<Blob | null>;
   file: File | null;
   setFile: Dispatch<File | null>;
 }) {
-  const { file, setFile } = props;
-  const [tool, setTool] = useState<Tool>("brush");
+  const { setCanvasState, file, setFile } = props;
+  const [tool, setTool] = useState<Tool>('brush');
   const [lines, setLines] = useState<DrawingLine[]>([]);
-  const [strokeId, setStrokeId] = useState<string>("");
+  const [strokeId, setStrokeId] = useState<string>('');
   const [undoLines, setUndoLines] = useState<DrawingLine[]>([]); // manages lines for redo
   const isDrawing = useRef(false);
   const [currentColour, setCurrentColour] = useState<Colour[]>([
-    "#ffffff",
-    "#dc2626",
-    "#16a34a",
-    "#2563eb",
+    '#ffffff',
+    '#dc2626',
+    '#16a34a',
+    '#2563eb',
   ]);
   const [canvasSize, setCanvasSize] = useState({ width: 500, height: 500 });
 
-  const [colorPicker, setColorPicker] = useState("#ffffff");
+  const [colorPicker, setColorPicker] = useState('#ffffff');
   const [colorPickerUsed, setColorPickerUsed] = useState(false);
   const [strokeWidth, setStrokeWidth] = useState(5);
 
@@ -59,13 +60,13 @@ export default function SimpleCanvasV3(props: {
   const fileUploadRef = useRef<HTMLInputElement>(null);
 
   const session = useDbSession();
-  const userId = session.data?.dbUser?.id ?? "";
+  const userId = session.data?.dbUser?.id ?? '';
   const username = session.data?.dbUser?.displayName;
 
   const ws = useWebSocket();
 
-  const [roomId, setRoomId] = useState<string>("default");
-  const [roomIdInput, setRoomIdInput] = useState<string>("default");
+  const [roomId, setRoomId] = useState<string>('default');
+  const [roomIdInput, setRoomIdInput] = useState<string>('default');
 
   const handleMouseDown = (
     e:
@@ -92,7 +93,7 @@ export default function SimpleCanvasV3(props: {
       setColorPickerUsed(false);
     }
 
-    const randomId = randomBytes(20).toString("hex");
+    const randomId = randomBytes(20).toString('hex');
     setStrokeId(randomId);
 
     setLines([
@@ -140,12 +141,12 @@ export default function SimpleCanvasV3(props: {
 
   // helper to send messages if the websocket is open
   const wsSend = useCallback(
-    (roomId: string, action: Message["action"], content?: object) => {
+    (roomId: string, action: Message['action'], content?: object) => {
       if (!ws) return;
       if (ws.readyState !== ws.OPEN) {
         return;
       }
-      console.log("sending", roomId, action, content);
+      console.log('sending', roomId, action, content);
       ws?.send(
         JSON.stringify({
           userid: userId,
@@ -161,36 +162,36 @@ export default function SimpleCanvasV3(props: {
 
   async function onMessage(event: MessageEvent) {
     const payload =
-      typeof event.data === "string" ? event.data : await event.data.text();
+      typeof event.data === 'string' ? event.data : await event.data.text();
     const message = JSON.parse(payload) as Message;
-    console.log("received", message);
-    if (message.action === "stroke" && message.content) {
+    console.log('received', message);
+    if (message.action === 'stroke' && message.content) {
       const stroke = message.content as unknown as DrawingLine; // wack type casting
       setLines((prevLines) => {
         const newLines = [...prevLines, stroke];
         return newLines;
       });
-    } else if (message.action === "clear") {
+    } else if (message.action === 'clear') {
       setLines([]);
       setUndoLines([]);
-    } else if (message.action === "undo" && message.content) {
-      console.log("UNDO", message.content);
+    } else if (message.action === 'undo' && message.content) {
+      console.log('UNDO', message.content);
       setLines((prevLines) => {
-        console.log("LINES", prevLines);
+        console.log('LINES', prevLines);
         const content = message.content as unknown as { undoId: string }; // wack type casting again
         if (!content) return prevLines;
         const newLines = prevLines.filter((l) => l.id != content.undoId);
-        console.log("newLines", newLines);
+        console.log('newLines', newLines);
         return newLines;
       });
-    } else if (message.action === "redo" && message.content) {
+    } else if (message.action === 'redo' && message.content) {
       const stroke = message.content as unknown as DrawingLine;
       setLines((prevLines) => {
         const newLines = [...prevLines, stroke];
         return newLines;
       });
-      console.log("UNDO", message.content);
-    } else if (message.action === "join-response" && message.content) {
+      console.log('UNDO', message.content);
+    } else if (message.action === 'join-response' && message.content) {
       const strokes = JSON.parse(message.content);
       for (const stroke of strokes) {
         setLines((prevLines) => {
@@ -199,26 +200,26 @@ export default function SimpleCanvasV3(props: {
         });
       }
       setLines(strokes);
-      console.log("joined", strokes);
+      console.log('joined', strokes);
     }
   }
 
   useEffect(() => {
-    ws?.addEventListener("message", onMessage);
-    wsSend(roomId, "join");
+    ws?.addEventListener('message', onMessage);
+    wsSend(roomId, 'join');
 
     // rerun when navigating away and coming back
 
     return () => {
-      ws?.removeEventListener("message", onMessage);
-      wsSend(roomId, "leave");
+      ws?.removeEventListener('message', onMessage);
+      wsSend(roomId, 'leave');
     };
   }, [ws, roomId, wsSend]);
 
   const handleMouseUp = () => {
     isDrawing.current = false;
     if (currentStroke.length != 0) {
-      wsSend(roomId, "stroke", {
+      wsSend(roomId, 'stroke', {
         id: strokeId,
         tool: tool,
         size: strokeWidth,
@@ -240,7 +241,7 @@ export default function SimpleCanvasV3(props: {
       setMousePos({ x: e.clientX, y: e.clientY });
 
       const canvas: HTMLCanvasElement | null = document.querySelector(
-        "#canvas-stage > div > canvas"
+        '#canvas-stage > div > canvas'
       );
 
       if (!canvas) return;
@@ -257,10 +258,10 @@ export default function SimpleCanvasV3(props: {
         e.clientY < canvasPos.current.top + canvasSize.height
       ) {
         setShowCursor(true);
-        canvas.style.cursor = "none";
+        canvas.style.cursor = 'none';
       } else {
         setShowCursor(false);
-        canvas.style.cursor = "default";
+        canvas.style.cursor = 'default';
       }
     };
 
@@ -273,7 +274,7 @@ export default function SimpleCanvasV3(props: {
 
   // called when file is changed to null
   const resetEditor = useCallback(() => {
-    console.log("resetting editor");
+    console.log('resetting editor');
     setLines([]);
     setUndoLines([]);
     setCanvasSize({ width: 500, height: 500 });
@@ -281,14 +282,14 @@ export default function SimpleCanvasV3(props: {
     // reset upload input
     const upload = fileUploadRef.current;
     if (!upload) return;
-    upload.value = "";
+    upload.value = '';
 
     // remove background image
-    const bg = document.querySelector(".konvajs-content") as HTMLDivElement;
+    const bg = document.querySelector('.konvajs-content') as HTMLDivElement;
     if (!bg) return;
-    bg.style.backgroundImage = "";
+    bg.style.backgroundImage = '';
 
-    wsSend(roomId, "join");
+    wsSend(roomId, 'join');
   }, [wsSend, roomId]);
 
   // if file is changed to null, reset canvas
@@ -298,20 +299,20 @@ export default function SimpleCanvasV3(props: {
     }
   }, [file, resetEditor]);
 
-  // save canvas
-  const saveCanvas = () => {
+  useEffect(() => {
     const canvas: HTMLCanvasElement | null = document.querySelector(
-      "#canvas-stage > div > canvas"
+      '#canvas-stage > div > canvas'
     );
-    if (!canvas) return;
-
-    console.log("found canvas");
+    if (!canvas) {
+      setCanvasState(null);
+      return;
+    }
 
     // create new canvas, fill with white, draw old canvas on top
-    const newCanvas = document.createElement("canvas");
+    const newCanvas = document.createElement('canvas');
     newCanvas.width = canvasSize.width;
     newCanvas.height = canvasSize.height;
-    const newCtx = newCanvas.getContext("2d");
+    const newCtx = newCanvas.getContext('2d');
     if (!newCtx) return;
 
     const drawOldCanvas = () => {
@@ -319,11 +320,7 @@ export default function SimpleCanvasV3(props: {
       oldCanvas.src = canvas.toDataURL();
       oldCanvas.onload = () => {
         newCtx.drawImage(oldCanvas, 0, 0, canvasSize.width, canvasSize.height);
-
-        const link = document.createElement("a");
-        link.href = newCanvas.toDataURL();
-        link.download = "canvas.png";
-        link.click();
+        newCanvas.toBlob(setCanvasState);
       };
     };
 
@@ -335,7 +332,51 @@ export default function SimpleCanvasV3(props: {
         drawOldCanvas();
       };
     } else {
-      newCtx.fillStyle = "#000000";
+      newCtx.fillStyle = '#000000';
+      newCtx.fillRect(0, 0, canvasSize.width, canvasSize.height);
+      drawOldCanvas();
+    }
+  }, [lines, canvasSize, file]);
+
+  // save canvas
+  const saveCanvas = () => {
+    const canvas: HTMLCanvasElement | null = document.querySelector(
+      '#canvas-stage > div > canvas'
+    );
+    if (!canvas) return;
+
+    console.log('found canvas');
+
+    // create new canvas, fill with white, draw old canvas on top
+    const newCanvas = document.createElement('canvas');
+    newCanvas.width = canvasSize.width;
+    newCanvas.height = canvasSize.height;
+    const newCtx = newCanvas.getContext('2d');
+    if (!newCtx) return;
+
+    const drawOldCanvas = () => {
+      const oldCanvas = new Image();
+      oldCanvas.src = canvas.toDataURL();
+      oldCanvas.onload = () => {
+        newCtx.drawImage(oldCanvas, 0, 0, canvasSize.width, canvasSize.height);
+
+        const link = document.createElement('a');
+        link.href = newCanvas.toDataURL();
+        link.download = 'canvas.png';
+        link.click();
+      };
+    };
+
+    if (file) {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        newCtx.drawImage(img, 0, 0, canvasSize.width, canvasSize.height);
+        drawOldCanvas();
+      };
+      img;
+    } else {
+      newCtx.fillStyle = '#000000';
       newCtx.fillRect(0, 0, canvasSize.width, canvasSize.height);
       drawOldCanvas();
     }
@@ -348,11 +389,11 @@ export default function SimpleCanvasV3(props: {
           <div
             id="circularcursor"
             style={{
-              left: mousePos.x + window.scrollX - strokeWidth / 2 + "px",
-              top: mousePos.y + window.scrollY - strokeWidth / 2 + "px",
+              left: mousePos.x + window.scrollX - strokeWidth / 2 + 'px',
+              top: mousePos.y + window.scrollY - strokeWidth / 2 + 'px',
               width: strokeWidth,
               height: strokeWidth,
-              mixBlendMode: "difference",
+              mixBlendMode: 'difference',
             }}
           ></div>
         )}
@@ -379,7 +420,7 @@ export default function SimpleCanvasV3(props: {
               const MAX_SIZE = 500;
 
               if (img.width > img.height) {
-                console.log("new canvas size", {
+                console.log('new canvas size', {
                   width: MAX_SIZE,
                   height: (MAX_SIZE / img.width) * img.height,
                 });
@@ -388,7 +429,7 @@ export default function SimpleCanvasV3(props: {
                   height: (MAX_SIZE / img.width) * img.height,
                 });
               } else {
-                console.log("new canvas size", {
+                console.log('new canvas size', {
                   width: (MAX_SIZE / img.height) * img.width,
                   height: MAX_SIZE,
                 });
@@ -399,7 +440,7 @@ export default function SimpleCanvasV3(props: {
               }
 
               const bg = document.querySelector(
-                ".konvajs-content"
+                '.konvajs-content'
               ) as HTMLDivElement;
               if (!bg) return;
               bg.style.backgroundImage = `url(${img.src})`;
@@ -413,24 +454,24 @@ export default function SimpleCanvasV3(props: {
               setLines([]);
               setUndoLines([]);
 
-              wsSend(roomId, "clear");
+              wsSend(roomId, 'clear');
             }}
           >
             <FontAwesomeIcon icon={faCancel} />
           </button>
           <button
             className={
-              tool === "brush" ? "bg-background-300 text-text-900" : ""
+              tool === 'brush' ? 'bg-background-300 text-text-900' : ''
             }
-            onClick={() => setTool("brush")}
+            onClick={() => setTool('brush')}
           >
             <FontAwesomeIcon icon={faPencil} />
           </button>
           <button
             className={
-              tool === "eraser" ? "bg-background-300 text-text-900" : ""
+              tool === 'eraser' ? 'bg-background-300 text-text-900' : ''
             }
-            onClick={() => setTool("eraser")}
+            onClick={() => setTool('eraser')}
           >
             <FontAwesomeIcon icon={faEraser} />
           </button>
@@ -463,7 +504,7 @@ export default function SimpleCanvasV3(props: {
             <button
               key={i}
               className={`border-white border-2 rounded-full p-0 min-w-0 w-[15px] min-h-0 h-[15px] ${
-                currentColour[0] === colour ? "border-2" : ""
+                currentColour[0] === colour ? 'border-2' : ''
               }`}
               onClick={() =>
                 setCurrentColour([
@@ -511,7 +552,7 @@ export default function SimpleCanvasV3(props: {
               setUndoLines([...undoLines, toUndo]);
               setLines(lines.filter((l) => l.id != toUndo.id));
 
-              wsSend(roomId, "undo", { undoId: toUndo.id });
+              wsSend(roomId, 'undo', { undoId: toUndo.id });
             }}
           >
             <FontAwesomeIcon icon={faUndo} />
@@ -525,7 +566,7 @@ export default function SimpleCanvasV3(props: {
               setLines([...lines, toRedo]);
               setUndoLines(undoLines.slice(0, -1));
 
-              wsSend(roomId, "redo", toRedo);
+              wsSend(roomId, 'redo', toRedo);
             }}
           >
             <FontAwesomeIcon icon={faRedo} />
@@ -564,7 +605,7 @@ export default function SimpleCanvasV3(props: {
                   lineCap="round"
                   lineJoin="round"
                   globalCompositeOperation={
-                    line.tool === "brush" ? "source-over" : "destination-out"
+                    line.tool === 'brush' ? 'source-over' : 'destination-out'
                   }
                 />
               ))}
@@ -574,12 +615,12 @@ export default function SimpleCanvasV3(props: {
       </div>
       <div className="flex flex-col gap-2">
         <span>
-          State:{" "}
+          State:{' '}
           {ws?.readyState === 0
-            ? "Connecting"
+            ? 'Connecting'
             : ws?.readyState === 1
-            ? "Connected"
-            : "Disconnected"}
+            ? 'Connected'
+            : 'Disconnected'}
           {ws?.readyState === 1 && ` to ${roomId}`}
         </span>
         <input
@@ -592,12 +633,12 @@ export default function SimpleCanvasV3(props: {
           className="bg-primary-600 text-text-900"
           onClick={() => {
             setRoomId(roomIdInput);
-            wsSend(roomIdInput, "join");
+            wsSend(roomIdInput, 'join');
           }}
         >
           join room
         </button>
-      </div>{" "}
+      </div>{' '}
       {/* <WebSocketComponent /> */}
     </div>
   );

@@ -28,6 +28,7 @@ export default function Page() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isImagePost, setIsImagePost] = useState(true);
   const [cameraLocation, setCameraLocation] = useState({ lat: 0, lng: 0 });
+  const [canvasState, setCanvasState] = useState<Blob | null>(null);
 
   const [poi, setPoi] = useState({
     key: 'poi',
@@ -73,18 +74,8 @@ export default function Page() {
       formData.append('textContent', data.textContent);
     }
 
-    const canvas: HTMLCanvasElement | null = document.querySelector(
-      '#canvas-stage > div > canvas'
-    );
-
-    const canvasImage: Blob | null = await new Promise((resolve) => {
-      canvas?.toBlob((canvasImage) => {
-        resolve(canvasImage);
-      });
-      resolve(null);
-    });
-    if (canvasImage) {
-      formData.append('image', canvasImage);
+    if (canvasState) {
+      formData.append('image', canvasState);
     }
 
     formData.append('locationName', data.locationName);
@@ -93,7 +84,6 @@ export default function Page() {
     formData.append('postedTime', data.postedTime);
     formData.append('title', data.title);
     console.log('Data to be sent: ', formData);
-
     const res = await fetch('/api/posts', {
       method: 'POST',
       body: formData,
@@ -241,7 +231,11 @@ export default function Page() {
         style={{ display: secondStep && isImagePost ? 'block' : 'none' }}
         className="flex w-full place-items-center"
       >
-        <SimpleCanvasV3 file={file} setFile={setFile} />
+        <SimpleCanvasV3
+          file={file}
+          setFile={setFile}
+          setCanvasState={setCanvasState}
+        />
       </div>
 
       {secondStep && <CreatePostForm formData={data} setFormData={setData} />}
