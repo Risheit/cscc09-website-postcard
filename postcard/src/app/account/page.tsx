@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import useDbSession from '@/app/hooks/useDbSession';
+import useDbSession from "@/app/hooks/useDbSession";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import DisplayName from '../components/Account/DisplayName/DisplayName';
-import AboutMe from '../components/Account/AboutMe/AboutMe';
-import ProfilePicture from '../components/Account/ProfilePicture/ProfilePicture';
-import Image from 'next/image';
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import DisplayName from "../components/Account/DisplayName/DisplayName";
+import AboutMe from "../components/Account/AboutMe/AboutMe";
+import ProfilePicture from "../components/Account/ProfilePicture/ProfilePicture";
+import Image from "next/image";
 
 export default function Page() {
   const session = useDbSession();
@@ -16,14 +16,14 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('session', session);
-    if (!session || session.status === 'unauthenticated') {
-      router.push('/api/auth/signin');
+    console.log("session", session);
+    if (!session || session.status === "unauthenticated") {
+      router.push("/api/auth/signin");
     }
-    if (session?.status === 'authenticated') {
+    if (session?.status === "authenticated") {
       setIsLoading(false);
     }
-  }, [session]);
+  }, [session, router]);
 
   const handleAccountEdit = (data: {
     displayName?: string;
@@ -32,21 +32,21 @@ export default function Page() {
   }) => {
     const formData = new FormData();
     if (data.displayName) {
-      formData.append('displayName', data.displayName);
+      formData.append("displayName", data.displayName);
     }
     if (data.aboutMe) {
-      formData.append('aboutMe', data.aboutMe);
+      formData.append("aboutMe", data.aboutMe);
     }
     if (data.profilePicture) {
       formData.append(
-        'profilePic',
+        "profilePic",
         data.profilePicture,
-        `${user?.id ?? ''}_data.profilePicture.name)`
+        `${user?.id ?? ""}_data.profilePicture.name)`
       );
     }
 
     fetch(`/api/users/${user?.id}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: formData,
     });
   };

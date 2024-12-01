@@ -17,7 +17,7 @@ import CreatePostForm from "@/app/components/CreatePostForm/CreatePostForm";
 import { useRouter } from "next/navigation";
 
 const SimpleCanvasV2 = dynamic(
-  () => import("@/app/components/SimpleCanvasV2/SimpleCanvasV2"),
+  () => import("@/app/components/SimpleCanvasV3/SimpleCanvasV3"),
   {
     ssr: false,
   }

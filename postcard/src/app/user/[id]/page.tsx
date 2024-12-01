@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import AboutMe from '@/app/components/Account/AboutMe/AboutMe';
-import DisplayName from '@/app/components/Account/DisplayName/DisplayName';
-import ProfilePicture from '@/app/components/Account/ProfilePicture/ProfilePicture';
-import useDbSession from '@/app/hooks/useDbSession';
-import { User } from '@/backend/users';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import AboutMe from "@/app/components/Account/AboutMe/AboutMe";
+import DisplayName from "@/app/components/Account/DisplayName/DisplayName";
+import ProfilePicture from "@/app/components/Account/ProfilePicture/ProfilePicture";
+import useDbSession from "@/app/hooks/useDbSession";
+import { User } from "@/backend/users";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Page({ params }: { params: { id: string } }) {
   const session = useDbSession();
@@ -17,7 +17,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (session.data?.dbUser?.id === params.id) {
-      router.push('/account');
+      router.push("/account");
     }
 
     fetch(`/api/users/${params.id}`)
@@ -29,7 +29,7 @@ export default function Page({ params }: { params: { id: string } }) {
       .catch((err) => {
         console.log(err);
       });
-  }, [session]);
+  }, [session, params.id, router]);
 
   return (
     <div className="flex flex-auto">

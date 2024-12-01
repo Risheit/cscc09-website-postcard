@@ -1,7 +1,7 @@
-import { User } from '@/backend/users';
-import { faPen, faXmark, faCheck } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useState } from 'react';
+import { User } from "@/backend/users";
+import { faPen, faXmark, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useEffect, useState } from "react";
 
 export default function AboutMe(props: {
   user?: User;
@@ -31,7 +31,7 @@ export default function AboutMe(props: {
     if (!isEditing) {
       setEditAboutMe(user?.aboutMe);
     }
-  }, [user?.aboutMe]);
+  }, [user?.aboutMe, isEditing]);
 
   return (
     <div className="flex gap-3 flex-col bg-background-50 rounded-md p-6  my-8">

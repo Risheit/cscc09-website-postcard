@@ -1,7 +1,7 @@
-import { User } from '@/backend/users';
-import { faPen, faXmark } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { KeyboardEvent, useEffect, useState } from 'react';
+import { User } from "@/backend/users";
+import { faPen, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { KeyboardEvent, useEffect, useState } from "react";
 
 export default function DisplayName(props: {
   user?: User;
@@ -18,11 +18,11 @@ export default function DisplayName(props: {
   const [editName, setEditName] = useState(user?.displayName);
 
   function handleKeyDown(ev: KeyboardEvent<HTMLInputElement>): void {
-    if (!editName || editName.trim() === '') {
+    if (!editName || editName.trim() === "") {
       return;
     }
 
-    if (ev.key === 'Enter') {
+    if (ev.key === "Enter") {
       setIsEditing(false);
       if (onEdit) {
         onEdit({ displayName: editName });
@@ -36,7 +36,7 @@ export default function DisplayName(props: {
     if (!isEditing) {
       setEditName(user?.displayName);
     }
-  }, [user?.displayName]);
+  }, [user?.displayName, isEditing]);
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 import {
   faMapPin,
@@ -7,50 +7,51 @@ import {
   faComments,
   faRetweet,
   faShareFromSquare,
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Image from "next/image";
 
-import { useMap } from '@vis.gl/react-google-maps';
-import { useRouter } from 'next/navigation';
+import { Dispatch, useState } from "react";
+import { useMap } from "@vis.gl/react-google-maps";
+import { useRouter } from "next/navigation";
 
-import { Post } from '@/app/models/post';
-import { Dispatch, useState } from 'react';
-import Image from 'next/image';
+import { Post } from "@/app/models/post";
+import PostModal from "../PostModal/PostModal";
 
 function upvoted(post: Post): Post {
   switch (post.local_liked_status) {
-    case 'liked':
+    case "liked":
       return {
         ...post,
         likes: post.likes - 1,
         local_liked_status: undefined,
       };
-    case 'disliked':
+    case "disliked":
       return {
         ...post,
         likes: post.likes + 1,
         dislikes: post.dislikes - 1,
-        local_liked_status: 'liked',
+        local_liked_status: "liked",
       };
     default:
       return {
         ...post,
         likes: post.likes + 1,
-        local_liked_status: 'liked',
+        local_liked_status: "liked",
       };
   }
 }
 
 function downvoted(post: Post): Post {
   switch (post.local_liked_status) {
-    case 'liked':
+    case "liked":
       return {
         ...post,
         likes: post.likes - 1,
         dislikes: post.dislikes + 1,
-        local_liked_status: 'disliked',
+        local_liked_status: "disliked",
       };
-    case 'disliked':
+    case "disliked":
       return {
         ...post,
         dislikes: post.dislikes - 1,
@@ -60,7 +61,7 @@ function downvoted(post: Post): Post {
       return {
         ...post,
         likes: post.likes + 1,
-        local_liked_status: 'liked',
+        local_liked_status: "liked",
       };
   }
 }
@@ -90,8 +91,8 @@ export default function Dashboard(props: {
     if (isFetching) return;
     setIsFetching(true);
     await fetch(`/api/posts/${postId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ action: 'like' }),
+      method: "PATCH",
+      body: JSON.stringify({ action: "like" }),
     });
     setIsFetching(false);
   };
@@ -106,17 +107,30 @@ export default function Dashboard(props: {
     if (isFetching) return;
     setIsFetching(true);
     await fetch(`/api/posts/${postId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ action: 'dislike' }),
+      method: "PATCH",
+      body: JSON.stringify({ action: "dislike" }),
     });
     setIsFetching(false);
+  };
+
+  const [isPostOpen, setIsPostOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+
+  const handleOpenModal = (post: Post) => {
+    setSelectedPost(post);
+    setIsPostOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPost(null);
+    setIsPostOpen(false);
   };
 
   return (
     <div
       id="dashboard"
       className="absolute right-0 p-2 z-10 overflow-y-auto no-scrollbar flex flex-col gap-2"
-      style={{ width: '30%', height: 'calc(100vh - 48px - 8px)' }}
+      style={{ width: "max(400px, 30%)", height: "calc(100vh - 48px - 8px)" }}
     >
       {posts.map((post) => (
         <div
@@ -133,7 +147,7 @@ export default function Dashboard(props: {
                 <Image
                   src={post.poster_profile_pic}
                   alt="profile"
-                  className="rounded-full w-6"
+                  className="rounded-full w-6 select-none"
                 />
               ) : (
                 <span className="rounded-full h-6 w-6 bg-primary-600"></span>
@@ -148,11 +162,11 @@ export default function Dashboard(props: {
 
             {/* date stamp, today formatted */}
             <span className="text-sm font-light text-text-900">
-              {new Date(post.posted_time).toLocaleString('en-US', {
-                year: '2-digit',
-                month: '2-digit',
-                day: '2-digit',
-                hour: 'numeric',
+              {new Date(post.posted_time).toLocaleString("en-US", {
+                year: "2-digit",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "numeric",
               })}
             </span>
           </div>
@@ -166,22 +180,24 @@ export default function Dashboard(props: {
           >
             <span className="flex-grow whitespace-nowrap">
               <FontAwesomeIcon icon={faMapPin} className="pr-1" />
-              {post.location_name ? post.location_name : 'Unnamed location'}
+              {post.location_name ? post.location_name : "Unnamed location"}
             </span>
             <span className="text-right flex-grow">
               <span className="whitespace-nowrap">
-                {post.lat.toFixed(6)}° {post.lat > 0 ? 'N' : 'S'}
-                {', '}
+                {post.lat.toFixed(6)}° {post.lat > 0 ? "N" : "S"}
+                {", "}
               </span>
               <span className="whitespace-nowrap">
-                {post.lng.toFixed(6)}° {post.lng > 0 ? 'W' : 'E'}
+                {post.lng.toFixed(6)}° {post.lng > 0 ? "W" : "E"}
               </span>
             </span>
           </div>
           {post.image_content ? (
-            <Link
-              href={`/post/${post.id}`}
-              className="bg-slate-50 p-2 w-full rounded-sm"
+            <div
+              onClick={() => {
+                handleOpenModal(post);
+              }}
+              className="bg-slate-50 p-2 w-full rounded-sm select-none"
             >
               {/* TODO: get images to work */}
               <Image
@@ -190,16 +206,25 @@ export default function Dashboard(props: {
                 className="shadow-sm mb-2"
               />
               <span className="h-4 bg-slate-50 text-black">{post.title}</span>
-            </Link>
+            </div>
           ) : (
-            <span className="h-4 mb-2">{post.title}</span>
+            <div
+              onClick={() => {
+                handleOpenModal(post);
+              }}
+              className="h-4 mb-2"
+            >
+              {post.title}
+            </div>
           )}
-          <Link
-            href={`/post/${post.id}`}
+          <div
+            onClick={() => {
+              handleOpenModal(post);
+            }}
             className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600"
           >
             {post.text_content}
-          </Link>
+          </div>
 
           <div className="flex place-items-center gap-2">
             <button
@@ -223,7 +248,7 @@ export default function Dashboard(props: {
             <button
               className="text-primary-500 inline whitespace-nowrap"
               onClick={() => {
-                router.push(`/post/${post.id}`);
+                handleOpenModal(post);
               }}
             >
               {post.num_comments}
@@ -251,17 +276,24 @@ export default function Dashboard(props: {
           </div>
 
           <span className="text-right text-text-400 text-xs font-light italic text-nowrap">
-            posted:{' '}
-            {new Date(post.created).toLocaleString('en-US', {
-              year: '2-digit',
-              month: '2-digit',
-              day: '2-digit',
-              hour: 'numeric',
-              minute: 'numeric',
+            posted:{" "}
+            {new Date(post.created).toLocaleString("en-US", {
+              year: "2-digit",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "numeric",
+              minute: "numeric",
             })}
           </span>
         </div>
       ))}
+      <PostModal
+        isPostOpen={isPostOpen}
+        selectedPost={selectedPost}
+        upvotePost={upvotePost}
+        downvotePost={downvotePost}
+        handleCloseModal={handleCloseModal}
+      />
     </div>
   );
 }

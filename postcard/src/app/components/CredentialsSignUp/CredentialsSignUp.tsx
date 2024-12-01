@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Dispatch, useEffect, useRef } from 'react';
+import { Dispatch, useEffect, useRef } from "react";
 
 export default function OAuthSignUp(props: {
   formData: {
@@ -20,7 +20,7 @@ export default function OAuthSignUp(props: {
   useEffect(() => {
     const isValid = usernameRef.current?.value && passwordRef.current?.value;
     setFormInvalid(!isValid);
-  }, [formData]);
+  }, [formData, setFormInvalid]);
 
   return (
     <div id="oauth-sign-up-form" className="grid grid-cols-1 gap-4 mb-4">
