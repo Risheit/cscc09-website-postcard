@@ -7,7 +7,13 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <WebSocketProvider url="ws://localhost:3000/api/ws">
+    <WebSocketProvider
+      url={
+        process.env.NODE_ENV === "production"
+          ? `wss://${process.env.NEXTAUTH_URL}/api/ws`
+          : `ws://${process.env.NEXTAUTH_URL}/api/ws`
+      }
+    >
       {children}
     </WebSocketProvider>
   );

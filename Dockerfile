@@ -27,10 +27,9 @@ COPY / /
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN \
-    if [ -f package.json ]; then npm run build; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
+RUN npx next-ws-cli@latest patch
+
+RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
