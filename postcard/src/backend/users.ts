@@ -32,11 +32,10 @@ function fromRawUser(userRaw?: {
   about_me: string;
 }) {
   const internalProfilePicPath =
-    userRaw?.profile_pic.trim() !== ''
+    userRaw && userRaw?.profile_pic.trim() !== ''
       ? `/api/images/${userRaw?.profile_pic}`
       : undefined;
 
-  console.log('internalProfilePicPath', internalProfilePicPath);
   return userRaw
     ? ({
         id: userRaw.id,
@@ -106,9 +105,7 @@ export async function addUser(
 }
 
 export async function attachAccountToUser(account: Account) {
-  console.log('attaching account to user', account);
   const { username, credentials, isOAuth, userId } = account;
-  console.log('here');
   const created = await pool.query(
     `INSERT INTO accounts (username, credentials, is_oauth, user_id) 
      VALUES($1::text, $2::text, $3::boolean, $4::text)
@@ -117,7 +114,6 @@ export async function attachAccountToUser(account: Account) {
     `,
     [username, credentials, isOAuth, userId]
   );
-  console.log('done');
   return fromRawAccount(created.rows[0]);
 }
 

@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   if (!x || !y) {
     query = await pool.query(
       `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name,
-        users.profile_pic as poster_profile_pic
+        users.profile_pic as poster_profile_pic, action
        FROM posts 
        JOIN users on owner = users.id
        LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
@@ -39,12 +39,17 @@ export async function GET(req: NextRequest) {
     );
   } else {
     query = await pool.query(
-      `SELECT ${asReadablePostQuery} FROM posts
-      WHERE ST_DWithin(posts.location, ST_MakePoint($1::decimal,$2::decimal)::geography, $3::decimal)
-      AND comment_of is NULL
-      ${ownerCondition}
-      ORDER BY posts.location <-> ST_MakePoint($1::decimal,$2::decimal)::geography, created DESC
-      LIMIT $4::bigint OFFSET $5::bigint`,
+      `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name, 
+        users.profile_pic as poster_profile_pic, action
+       FROM posts 
+       JOIN users on owner = users.id
+       LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
+       WHERE ST_DWithin(posts.location, ST_MakePoint($1::decimal,$2::decimal)::geography, $3::decimal)
+       AND comment_of is NULL
+       ${ownerCondition}
+       ORDER BY posts.location <-> ST_MakePoint($1::decimal,$2::decimal)::geography, created DESC
+       LIMIT $4::bigint OFFSET $5::bigint
+      `,
       [x, y, distance, limit, offset].concat(owner ? [owner?.id] : [])
     );
   }
@@ -61,7 +66,7 @@ const createPostSchema = zfd.formData({
   lat: zfd.numeric(),
   lng: zfd.numeric(),
   postedTime: zfd.text(),
-  title: zfd.text(z.string().optional()),
+  title: zfd.text(),
 });
 
 export async function POST(req: NextRequest) {
@@ -103,7 +108,7 @@ export async function POST(req: NextRequest) {
         `INSERT INTO posts (title, text_content, image_content, location_name, location,
           owner, posted_time, num_comments)
           VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
-          $7::integer, $8::timestamp, 0)
+          $7::text, $8::timestamp, 0)
           RETURNING ${asReadablePostQuery}`,
         [
           title ?? null,

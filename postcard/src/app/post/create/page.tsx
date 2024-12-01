@@ -1,20 +1,20 @@
-"use client";
-import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+'use client';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 
-import { faImage, faPenToSquare } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faImage, faPenToSquare } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import LocateMe from "@/app/components/Dashboard/LocateMe/LocateMe";
+import LocateMe from '@/app/components/Dashboard/LocateMe/LocateMe';
 
 import {
   APIProvider,
   Map,
   MapCameraChangedEvent,
-} from "@vis.gl/react-google-maps";
-import { PoiMarker } from "./marker";
-import CreatePostForm from "@/app/components/CreatePostForm/CreatePostForm";
-import { useRouter } from "next/navigation";
+} from '@vis.gl/react-google-maps';
+import { PoiMarker } from './marker';
+import CreatePostForm from '@/app/components/CreatePostForm/CreatePostForm';
+import { useRouter } from 'next/navigation';
 
 const SimpleCanvasV2 = dynamic(
   () => import("@/app/components/SimpleCanvasV3/SimpleCanvasV3"),
@@ -30,64 +30,67 @@ export default function Page() {
   const [cameraLocation, setCameraLocation] = useState({ lat: 0, lng: 0 });
 
   const [poi, setPoi] = useState({
-    key: "poi",
+    key: 'poi',
     location: { lat: 0, lng: 0 },
   });
 
   const [file, setFile] = useState<File | null>(null);
 
-  const [formData, setFormData] = useState({
-    locationName: "",
-    title: "",
-    textContent: "",
-    postedTime: "",
+  const [data, setData] = useState({
+    locationName: '',
+    title: '',
+    textContent: '',
+    postedTime: '',
   });
 
-  const CREATE_POST_MAP_ID = "create-post-map";
+  const CREATE_POST_MAP_ID = 'create-post-map';
 
   const [secondStep, setSecondStep] = useState(false);
 
   useEffect(() => {
     // load default camera location
-    if (localStorage.getItem("defaultCamera")) {
+    if (localStorage.getItem('defaultCamera')) {
       setCameraLocation(
         JSON.parse(
-          localStorage.getItem("defaultCamera") ?? '{"lat" : 0, "lng" : 0}'
+          localStorage.getItem('defaultCamera') ?? '{"lat" : 0, "lng" : 0}'
         )
       );
 
       setPoi({
-        key: "poi",
+        key: 'poi',
         location: JSON.parse(
-          localStorage.getItem("defaultCamera") ?? '{"lat" : 0, "lng" : 0}'
+          localStorage.getItem('defaultCamera') ?? '{"lat" : 0, "lng" : 0}'
         ),
       });
     }
   }, []);
 
   const submitPost = () => {
-    console.log("submitting post...");
-    console.log(formData);
+    console.log('submitting post...');
+    console.log(data);
 
-    const data = JSON.stringify({
-      locationName: formData.locationName,
-      title: formData.title,
-      textContent: formData.textContent,
-      postedTime: formData.postedTime,
-      lat: poi.location.lat.toFixed(5),
-      lng: poi.location.lng.toFixed(5),
-    });
+    const formData = new FormData();
+    if (data.textContent) {
+      formData.append('textContent', data.textContent);
+    }
+    if (file) {
+      formData.append('image', file);
+    }
+    formData.append('locationName', data.locationName);
+    formData.append('lat', poi.location.lat.toString());
+    formData.append('lng', poi.location.lng.toString());
+    formData.append('postedTime', data.postedTime);
+    formData.append('title', data.title);
+    console.log('Data to be sent: ', formData);
 
-    console.log("Data to be sent: ", data);
-
-    fetch("/api/posts", {
-      method: "POST",
-      body: data,
+    fetch('/api/posts', {
+      method: 'POST',
+      body: formData,
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Post submitted: ", data);
-        router.push("/dashboard");
+        console.log('Post submitted: ', data);
+        router.push('/dashboard');
       });
   };
 
@@ -97,19 +100,19 @@ export default function Page() {
 
       <p
         className="text-text-500"
-        style={{ display: secondStep ? "none" : "block" }}
+        style={{ display: secondStep ? 'none' : 'block' }}
       >
         Choose between an image post or a text-only post
       </p>
       <div
         className="grid grid-cols-2 gap-4 mb-4"
-        style={{ display: secondStep ? "none" : "grid" }}
+        style={{ display: secondStep ? 'none' : 'grid' }}
       >
         <button
           className="flex items-center p-4 bg-background-100 rounded-lg shadow-lg border-2 hover:border-2 text-left"
           style={{
-            color: isImagePost ? "var(--text-900)" : "var(--text-700)",
-            borderColor: isImagePost ? "var(--text-900)" : "transparent",
+            color: isImagePost ? 'var(--text-900)' : 'var(--text-700)',
+            borderColor: isImagePost ? 'var(--text-900)' : 'transparent',
           }}
           onClick={() => setIsImagePost(true)}
         >
@@ -124,8 +127,8 @@ export default function Page() {
         <button
           className="flex items-center p-4 bg-background-100 rounded-lg shadow-lg border-2 hover:border-2"
           style={{
-            color: !isImagePost ? "var(--text-900)" : "var(--text-700)",
-            borderColor: !isImagePost ? "var(--text-900)" : "transparent",
+            color: !isImagePost ? 'var(--text-900)' : 'var(--text-700)',
+            borderColor: !isImagePost ? 'var(--text-900)' : 'transparent',
           }}
           onClick={() => setIsImagePost(false)}
         >
@@ -140,23 +143,23 @@ export default function Page() {
       </div>
 
       <APIProvider
-        apiKey={process.env.NEXT_PUBLIC_GMP_API_KEY ?? ""}
-        onLoad={() => console.log("Maps API has loaded.")}
+        apiKey={process.env.NEXT_PUBLIC_GMP_API_KEY ?? ''}
+        onLoad={() => console.log('Maps API has loaded.')}
       >
         <div
           className="relative inline-block rounded-md overflow-hidden"
           style={{
-            width: "100%",
-            height: "100%",
-            minHeight: "300px",
-            color: "initial", // resets text color
-            display: secondStep ? "none" : "inline-block",
+            width: '100%',
+            height: '100%',
+            minHeight: '300px',
+            color: 'initial', // resets text color
+            display: secondStep ? 'none' : 'inline-block',
           }}
         >
           <Map
             style={{
-              visibility: mapLoaded ? "visible" : "hidden",
-              display: secondStep ? "none" : "block",
+              visibility: mapLoaded ? 'visible' : 'hidden',
+              display: secondStep ? 'none' : 'block',
             }}
             id={CREATE_POST_MAP_ID}
             defaultZoom={
@@ -166,10 +169,10 @@ export default function Page() {
               lat: cameraLocation.lat,
               lng: cameraLocation.lng,
             }}
-            mapId={process.env.NEXT_PUBLIC_GMP_MAP_ID ?? ""}
+            mapId={process.env.NEXT_PUBLIC_GMP_MAP_ID ?? ''}
             onCameraChanged={(ev: MapCameraChangedEvent) => {
               localStorage.setItem(
-                "defaultCamera",
+                'defaultCamera',
                 JSON.stringify(ev.detail.center)
               );
             }}
@@ -178,11 +181,11 @@ export default function Page() {
             disableDefaultUI={true}
             disableDoubleClickZoom={true}
             scrollwheel={true}
-            colorScheme={"FOLLOW_SYSTEM"}
+            colorScheme={'FOLLOW_SYSTEM'}
             onClick={(ev) => {
               if (!ev.detail.latLng) return;
               setPoi({
-                key: "poi",
+                key: 'poi',
                 location: ev.detail.latLng,
               });
             }}
@@ -198,11 +201,11 @@ export default function Page() {
           />
         </div>
       </APIProvider>
-      <div className="my-4" style={{ display: secondStep ? "none" : "block" }}>
-        <span className="font-semibold">Coordinates:</span>{" "}
+      <div className="my-4" style={{ display: secondStep ? 'none' : 'block' }}>
+        <span className="font-semibold">Coordinates:</span>{' '}
         <span className="bg-background-200 border border-text-500 rounded px-2 ml-1">
-          {poi.location.lat.toFixed(5)}° {poi.location.lat > 0 ? "N" : "S"},{" "}
-          {poi.location.lng.toFixed(5)}° {poi.location.lng > 0 ? "W" : "E"}
+          {poi.location.lat.toFixed(5)}° {poi.location.lat > 0 ? 'N' : 'S'},{' '}
+          {poi.location.lng.toFixed(5)}° {poi.location.lng > 0 ? 'W' : 'E'}
         </span>
       </div>
 
@@ -210,7 +213,7 @@ export default function Page() {
         className="mt-4 p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
         disabled={poi.location.lat === 0 && poi.location.lng === 0}
         onClick={() => setSecondStep(true)}
-        style={{ display: secondStep ? "none" : "block" }}
+        style={{ display: secondStep ? 'none' : 'block' }}
       >
         next...
       </button>
@@ -218,37 +221,35 @@ export default function Page() {
       {/* step 2 if image post was selected */}
       <p
         className="text-text-500"
-        style={{ display: secondStep ? "block" : "none" }}
+        style={{ display: secondStep ? 'block' : 'none' }}
       >
         {isImagePost
-          ? "Upload an image and customize your postcard"
-          : "Write your message without an image postcard"}
+          ? 'Upload an image and customize your postcard'
+          : 'Write your message without an image postcard'}
       </p>
 
       <div
-        style={{ display: secondStep && isImagePost ? "block" : "none" }}
+        style={{ display: secondStep && isImagePost ? 'block' : 'none' }}
         className="flex w-full place-items-center"
       >
         <SimpleCanvasV2 file={file} setFile={setFile} />
       </div>
 
-      {secondStep && (
-        <CreatePostForm formData={formData} setFormData={setFormData} />
-      )}
+      {secondStep && <CreatePostForm formData={data} setFormData={setData} />}
 
       <div
         className="grid grid-cols-2 gap-2 mb-12"
-        style={{ display: secondStep ? "grid" : "none" }}
+        style={{ display: secondStep ? 'grid' : 'none' }}
       >
         <button
           className="p-2 bg-background-200 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
           onClick={() => {
             setFile(null);
-            setFormData({
-              locationName: "",
-              title: "",
-              textContent: "",
-              postedTime: "",
+            setData({
+              locationName: '',
+              title: '',
+              textContent: '',
+              postedTime: '',
             });
 
             setSecondStep(false);
@@ -259,10 +260,10 @@ export default function Page() {
         <button
           className="p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
           disabled={
-            formData.locationName === "" ||
-            formData.title === "" ||
-            formData.textContent === "" ||
-            formData.postedTime === ""
+            data.locationName === '' ||
+            data.title === '' ||
+            data.textContent === '' ||
+            data.postedTime === ''
           }
           onClick={submitPost}
         >

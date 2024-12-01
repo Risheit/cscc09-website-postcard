@@ -14,12 +14,5 @@ async function getPool() {
   return pool;
 }
 
-// This is a good spot to check environment variables being passed into the server.
-console.log('DATABASE_HOST', process.env.DATABASE_HOST);
-console.log('DATABASE_USER', process.env.DATABASE_USER);
-console.log('DATABASE_PASSWORD', process.env.DATABASE_PASSWORD);
-console.log('DATABASE_NAME', process.env.DATABASE_NAME);
-console.log('SERVER ENV', process.env);
-
 const pool = await getPool();
 export default pool;

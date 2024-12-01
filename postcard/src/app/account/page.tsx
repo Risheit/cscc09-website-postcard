@@ -65,7 +65,7 @@ export default function Page() {
       )}
       {isLoading && (
         <div className="flex justify-center items-center h-full w-full">
-          <Image
+          <img
             src="/static/loading.svg"
             alt="loading..."
             className="w-20 h-20 mt-20 opacity-50"

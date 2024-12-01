@@ -144,7 +144,7 @@ export default function Dashboard(props: {
               className="flex place-items-center"
             >
               {post.poster_profile_pic ? (
-                <Image
+                <img
                   src={post.poster_profile_pic}
                   alt="profile"
                   className="rounded-full w-6 select-none"
@@ -199,9 +199,8 @@ export default function Dashboard(props: {
               }}
               className="bg-slate-50 p-2 w-full rounded-sm select-none"
             >
-              {/* TODO: get images to work */}
-              <Image
-                src={post.image_content}
+              <img
+                src={`/api/images/${post.image_content}`}
                 alt={post.title}
                 className="shadow-sm mb-2"
               />
