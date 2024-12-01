@@ -19,5 +19,5 @@ export type Post = {
   likes: number;
   dislikes: number;
   num_comments: number;
-  local_liked_status?: "liked" | "disliked";
+  local_liked_status?: "like" | "dislike";
 };

@@ -1,5 +1,5 @@
-import Link from "next/link";
-import "./PostModal.css";
+import Link from 'next/link';
+import './PostModal.css';
 
 import {
   faMapPin,
@@ -8,14 +8,13 @@ import {
   faComments,
   faRetweet,
   faShareFromSquare,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Modal } from "react-bootstrap";
+import { Modal } from 'react-bootstrap';
 
-import { Post } from "@/app/models/post";
-import { useRouter } from "next/navigation";
+import { Post } from '@/app/models/post';
+import { useRouter } from 'next/navigation';
 
 export default function PostModal(props: {
   isPostOpen: boolean;
@@ -47,16 +46,16 @@ export default function PostModal(props: {
             <div
               className="flip-container"
               onClick={() => {
-                const parentDiv = document.querySelector(".flip-container");
+                const parentDiv = document.querySelector('.flip-container');
                 if (parentDiv) {
-                  parentDiv.classList.toggle("flip");
+                  parentDiv.classList.toggle('flip');
                 }
               }}
             >
               <div className="front bg-slate-50 p-2 rounded-sm flex flex-col h-auto select-none">
                 {/* TODO: get images to work */}
-                <Image
-                  src={selectedPost.image_content}
+                <img
+                  src={`/api/images/${selectedPost.image_content}`}
                   alt={selectedPost.title}
                   className="shadow-sm mb-2"
                 />
@@ -66,8 +65,8 @@ export default function PostModal(props: {
               </div>
 
               <div className="back bg-slate-50 p-2 rounded-sm flex flex-col h-auto select-none">
-                <Image
-                  src={selectedPost.image_content}
+                <img
+                  src={`/api/images/${selectedPost.image_content}`}
                   alt={selectedPost.title}
                   className="shadow-sm mb-2"
                 />
@@ -77,7 +76,7 @@ export default function PostModal(props: {
                 <div className="absolute text-black text-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 font-light">
                   {selectedPost.text_content}
                   <span className="font-bold whitespace-nowrap">
-                    {" "}
+                    {' '}
                     —{selectedPost.poster_display_name}
                   </span>
                 </div>
@@ -95,7 +94,7 @@ export default function PostModal(props: {
               className="flex place-items-center"
             >
               {selectedPost.poster_profile_pic ? (
-                <Image
+                <img
                   src={selectedPost.poster_profile_pic}
                   alt="profile"
                   className="rounded-full w-6 select-none"
@@ -113,11 +112,11 @@ export default function PostModal(props: {
 
             {/* date stamp, today formatted */}
             <span className="text-sm font-light text-text-900">
-              {new Date(selectedPost.posted_time).toLocaleString("en-US", {
-                year: "2-digit",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "numeric",
+              {new Date(selectedPost.posted_time).toLocaleString('en-US', {
+                year: '2-digit',
+                month: '2-digit',
+                day: '2-digit',
+                hour: 'numeric',
               })}
             </span>
           </div>
@@ -132,17 +131,17 @@ export default function PostModal(props: {
               <FontAwesomeIcon icon={faMapPin} className="pr-1" />
               {selectedPost.location_name
                 ? selectedPost.location_name
-                : "Unnamed location"}
+                : 'Unnamed location'}
             </span>
             <span className="text-right flex-grow">
               <span className="whitespace-nowrap">
-                {selectedPost.lat.toFixed(6)}°{" "}
-                {selectedPost.lat > 0 ? "N" : "S"}
-                {", "}
+                {selectedPost.lat.toFixed(6)}°{' '}
+                {selectedPost.lat > 0 ? 'N' : 'S'}
+                {', '}
               </span>
               <span className="whitespace-nowrap">
-                {selectedPost.lng.toFixed(6)}°{" "}
-                {selectedPost.lng > 0 ? "W" : "E"}
+                {selectedPost.lng.toFixed(6)}°{' '}
+                {selectedPost.lng > 0 ? 'W' : 'E'}
               </span>
             </span>
           </div>
@@ -159,7 +158,14 @@ export default function PostModal(props: {
               }}
             >
               {selectedPost.likes}
-              <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
+              <FontAwesomeIcon
+                icon={faThumbsUp}
+                className={`pl-1 ${
+                  selectedPost.local_liked_status === 'like'
+                    ? 'text-orange-900'
+                    : ''
+                }`}
+              />
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
@@ -168,7 +174,14 @@ export default function PostModal(props: {
               }}
             >
               {selectedPost.dislikes}
-              <FontAwesomeIcon icon={faThumbsDown} className="pl-1" />
+              <FontAwesomeIcon
+                icon={faThumbsDown}
+                className={`pl-1 ${
+                  selectedPost.local_liked_status === 'dislike'
+                    ? 'text-orange-900'
+                    : ''
+                }`}
+              />
             </button>
             <button className="text-primary-500 inline whitespace-nowrap">
               {selectedPost.num_comments}
@@ -196,13 +209,13 @@ export default function PostModal(props: {
           </div>
 
           <span className="text-right text-text-400 text-xs font-light italic text-nowrap">
-            posted:{" "}
-            {new Date(selectedPost.created).toLocaleString("en-US", {
-              year: "2-digit",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "numeric",
-              minute: "numeric",
+            posted:{' '}
+            {new Date(selectedPost.created).toLocaleString('en-US', {
+              year: '2-digit',
+              month: '2-digit',
+              day: '2-digit',
+              hour: 'numeric',
+              minute: 'numeric',
             })}
           </span>
 

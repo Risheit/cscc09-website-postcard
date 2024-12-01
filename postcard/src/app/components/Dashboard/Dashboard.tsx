@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 import {
   faMapPin,
@@ -7,50 +7,51 @@ import {
   faComments,
   faRetweet,
   faShareFromSquare,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Dispatch, useState } from "react";
-import { useMap } from "@vis.gl/react-google-maps";
-import { useRouter } from "next/navigation";
+import { Dispatch, useState } from 'react';
+import { useMap } from '@vis.gl/react-google-maps';
+import { useRouter } from 'next/navigation';
 
-import { Post } from "@/app/models/post";
-import PostModal from "../PostModal/PostModal";
+import { Post } from '@/app/models/post';
+import PostModal from '../PostModal/PostModal';
 
 function upvoted(post: Post): Post {
   switch (post.local_liked_status) {
-    case "liked":
+    case 'like':
       return {
         ...post,
         likes: post.likes - 1,
         local_liked_status: undefined,
       };
-    case "disliked":
+    case 'dislike':
       return {
         ...post,
         likes: post.likes + 1,
         dislikes: post.dislikes - 1,
-        local_liked_status: "liked",
+        local_liked_status: 'like',
       };
     default:
       return {
         ...post,
         likes: post.likes + 1,
-        local_liked_status: "liked",
+        local_liked_status: 'like',
       };
   }
 }
 
 function downvoted(post: Post): Post {
+  console.log(post);
   switch (post.local_liked_status) {
-    case "liked":
+    case 'like':
       return {
         ...post,
         likes: post.likes - 1,
         dislikes: post.dislikes + 1,
-        local_liked_status: "disliked",
+        local_liked_status: 'dislike',
       };
-    case "disliked":
+    case 'dislike':
       return {
         ...post,
         dislikes: post.dislikes - 1,
@@ -59,8 +60,8 @@ function downvoted(post: Post): Post {
     default:
       return {
         ...post,
-        likes: post.likes + 1,
-        local_liked_status: "liked",
+        dislikes: post.dislikes + 1,
+        local_liked_status: 'dislike',
       };
   }
 }
@@ -90,8 +91,8 @@ export default function Dashboard(props: {
     if (isFetching) return;
     setIsFetching(true);
     await fetch(`/api/posts/${postId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ action: "like" }),
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'like' }),
     });
     setIsFetching(false);
   };
@@ -106,8 +107,8 @@ export default function Dashboard(props: {
     if (isFetching) return;
     setIsFetching(true);
     await fetch(`/api/posts/${postId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ action: "dislike" }),
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'dislike' }),
     });
     setIsFetching(false);
   };
@@ -129,7 +130,7 @@ export default function Dashboard(props: {
     <div
       id="dashboard"
       className="absolute right-0 p-2 z-10 overflow-y-auto no-scrollbar flex flex-col gap-2"
-      style={{ width: "max(400px, 30%)", height: "calc(100vh - 48px - 8px)" }}
+      style={{ width: 'max(400px, 30%)', height: 'calc(100vh - 48px - 8px)' }}
     >
       {posts.map((post) => (
         <div
@@ -161,11 +162,11 @@ export default function Dashboard(props: {
 
             {/* date stamp, today formatted */}
             <span className="text-sm font-light text-text-900">
-              {new Date(post.posted_time).toLocaleString("en-US", {
-                year: "2-digit",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "numeric",
+              {new Date(post.posted_time).toLocaleString('en-US', {
+                year: '2-digit',
+                month: '2-digit',
+                day: '2-digit',
+                hour: 'numeric',
               })}
             </span>
           </div>
@@ -179,15 +180,15 @@ export default function Dashboard(props: {
           >
             <span className="flex-grow whitespace-nowrap">
               <FontAwesomeIcon icon={faMapPin} className="pr-1" />
-              {post.location_name ? post.location_name : "Unnamed location"}
+              {post.location_name ? post.location_name : 'Unnamed location'}
             </span>
             <span className="text-right flex-grow">
               <span className="whitespace-nowrap">
-                {post.lat.toFixed(6)}° {post.lat > 0 ? "N" : "S"}
-                {", "}
+                {post.lat.toFixed(6)}° {post.lat > 0 ? 'N' : 'S'}
+                {', '}
               </span>
               <span className="whitespace-nowrap">
-                {post.lng.toFixed(6)}° {post.lng > 0 ? "W" : "E"}
+                {post.lng.toFixed(6)}° {post.lng > 0 ? 'W' : 'E'}
               </span>
             </span>
           </div>
@@ -232,7 +233,12 @@ export default function Dashboard(props: {
               }}
             >
               {post.likes}
-              <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
+              <FontAwesomeIcon
+                icon={faThumbsUp}
+                className={`pl-1 ${
+                  post.local_liked_status === 'like' ? 'text-orange-900' : ''
+                }`}
+              />
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
@@ -241,7 +247,12 @@ export default function Dashboard(props: {
               }}
             >
               {post.dislikes}
-              <FontAwesomeIcon icon={faThumbsDown} className="pl-1" />
+              <FontAwesomeIcon
+                icon={faThumbsDown}
+                className={`pl-1 ${
+                  post.local_liked_status === 'dislike' ? 'text-orange-900' : ''
+                }`}
+              />
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
@@ -274,13 +285,13 @@ export default function Dashboard(props: {
           </div>
 
           <span className="text-right text-text-400 text-xs font-light italic text-nowrap">
-            posted:{" "}
-            {new Date(post.created).toLocaleString("en-US", {
-              year: "2-digit",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "numeric",
-              minute: "numeric",
+            posted:{' '}
+            {new Date(post.created).toLocaleString('en-US', {
+              year: '2-digit',
+              month: '2-digit',
+              day: '2-digit',
+              hour: 'numeric',
+              minute: 'numeric',
             })}
           </span>
         </div>
@@ -288,8 +299,22 @@ export default function Dashboard(props: {
       <PostModal
         isPostOpen={isPostOpen}
         selectedPost={selectedPost}
-        upvotePost={upvotePost}
-        downvotePost={downvotePost}
+        upvotePost={(postId) => {
+          const post = posts.find((post) => post.id === postId);
+          if (post) {
+            setSelectedPost(upvoted(post));
+          }
+
+          upvotePost(postId);
+        }}
+        downvotePost={async (postId) => {
+          const post = posts.find((post) => post.id === postId);
+          if (post) {
+            setSelectedPost(downvoted(post));
+          }
+
+          downvotePost(postId);
+        }}
         handleCloseModal={handleCloseModal}
       />
     </div>
