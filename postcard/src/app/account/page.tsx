@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import DisplayName from "../components/Account/DisplayName/DisplayName";
 import AboutMe from "../components/Account/AboutMe/AboutMe";
 import ProfilePicture from "../components/Account/ProfilePicture/ProfilePicture";
-import Image from "next/image";
 
 export default function Page() {
   const session = useDbSession();

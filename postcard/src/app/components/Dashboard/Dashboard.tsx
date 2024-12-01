@@ -9,7 +9,6 @@ import {
   faShareFromSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Image from "next/image";
 
 import { Dispatch, useState } from "react";
 import { useMap } from "@vis.gl/react-google-maps";
