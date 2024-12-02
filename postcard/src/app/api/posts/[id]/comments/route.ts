@@ -38,7 +38,7 @@ const createPostSchema = zfd.formData({
   locationName: zfd.text(),
   lat: zfd.numeric(),
   lng: zfd.numeric(),
-  postedTime: zfd.text(z.string().datetime()),
+  postedTime: zfd.text(),
   title: zfd.text(z.string().optional()),
 });
 
@@ -64,12 +64,20 @@ export async function POST(
 
       const parseResult = createPostSchema.safeParse(formData);
       if (!parseResult.success) {
-        return Response.json({ error: 'Invalid form data' }, { status: 400 });
+        return Response.json({ error: parseResult.error }, { status: 400 });
       }
 
       const { textContent, image, locationName, lat, lng, postedTime, title } =
         parseResult.data;
 
+      const owner_image = await pool.query(
+        `SELECT image_content FROM posts WHERE id = $1::integer`,
+        [id]
+      );
+      if (!owner_image.rows[0].image_content) {
+        return Response.json({ error: 'Cannot remix a text post' }, { status: 400 });
+      }
+      
       let fileId: string | undefined;
       if (image) {
         fileId = await uploadNewImage({ file: image, owner: userId });
@@ -79,7 +87,7 @@ export async function POST(
       }
 
       const query = await pool.query(
-        `INSERT INTO posts (text_content, image_content, location_name, location,
+        `INSERT INTO posts (title, text_content, image_content, location_name, location,
           comment_of, owner, posted_time, num_comments)
           VALUES ($1::text, $2::text, $3::text, $4::text, ST_MakePoint($5::decimal,$6::decimal),
           $7::integer, $8::text, $9::timestamp, 0)

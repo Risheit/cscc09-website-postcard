@@ -19,6 +19,7 @@ export type Post = {
   likes: number;
   dislikes: number;
   num_comments: number;
+  comments: Post[];
   local_liked_status?: 'like' | 'dislike';
 
   // TODO: replace mock remix fields with actual remix fields

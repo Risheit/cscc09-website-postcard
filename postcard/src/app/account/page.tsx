@@ -48,6 +48,10 @@ export default function Page() {
       method: "PATCH",
       body: formData,
     });
+
+    if (data.profilePicture) {
+      router.refresh();
+    }
   };
 
   return (

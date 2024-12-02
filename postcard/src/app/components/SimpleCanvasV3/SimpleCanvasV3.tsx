@@ -345,6 +345,8 @@ export default function SimpleCanvasV3(props: {
   useEffect(() => {
     if (file === null) {
       resetEditor();
+    } else {
+      setBackground(file);
     }
   }, [file]);
 
@@ -428,6 +430,45 @@ export default function SimpleCanvasV3(props: {
       newCtx.fillRect(0, 0, canvasSize.width, canvasSize.height);
       drawOldCanvas();
     }
+  };
+
+  const setBackground = (image: File) => {
+    const img = new Image();
+    img.src = URL.createObjectURL(image);
+    img.onload = () => {
+      console.log(`${img.width} x ${img.height}`);
+
+      setLines([]);
+      setUndoLines([]);
+
+      // scale canvas to image size
+
+      const MAX_SIZE = 500;
+
+      if (img.width > img.height) {
+        console.log('new canvas size', {
+          width: MAX_SIZE,
+          height: (MAX_SIZE / img.width) * img.height,
+        });
+        setCanvasSize({
+          width: MAX_SIZE,
+          height: (MAX_SIZE / img.width) * img.height,
+        });
+      } else {
+        console.log('new canvas size', {
+          width: (MAX_SIZE / img.height) * img.width,
+          height: MAX_SIZE,
+        });
+        setCanvasSize({
+          width: (MAX_SIZE / img.height) * img.width,
+          height: MAX_SIZE,
+        });
+      }
+
+      const bg = document.querySelector('.konvajs-content') as HTMLDivElement;
+      if (!bg) return;
+      bg.style.backgroundImage = `url(${img.src})`;
+    };
   };
 
   return (
@@ -568,45 +609,6 @@ export default function SimpleCanvasV3(props: {
               if (e.target.files === null || e.target.files.length === 0)
                 return;
               setFile(e.target.files[0]);
-
-              const img = new Image();
-              img.src = URL.createObjectURL(e.target.files[0]);
-              img.onload = () => {
-                console.log(`${img.width} x ${img.height}`);
-
-                setLines([]);
-                setUndoLines([]);
-
-                // scale canvas to image size
-
-                const MAX_SIZE = 500;
-
-                if (img.width > img.height) {
-                  console.log('new canvas size', {
-                    width: MAX_SIZE,
-                    height: (MAX_SIZE / img.width) * img.height,
-                  });
-                  setCanvasSize({
-                    width: MAX_SIZE,
-                    height: (MAX_SIZE / img.width) * img.height,
-                  });
-                } else {
-                  console.log('new canvas size', {
-                    width: (MAX_SIZE / img.height) * img.width,
-                    height: MAX_SIZE,
-                  });
-                  setCanvasSize({
-                    width: (MAX_SIZE / img.height) * img.width,
-                    height: MAX_SIZE,
-                  });
-                }
-
-                const bg = document.querySelector(
-                  '.konvajs-content'
-                ) as HTMLDivElement;
-                if (!bg) return;
-                bg.style.backgroundImage = `url(${img.src})`;
-              };
             }}
           ></input>
           <div className="w-full h-10 flex place-items-center gap-1 p-1">

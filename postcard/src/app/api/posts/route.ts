@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
        FROM posts 
        JOIN users on owner = users.id
        LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
-       WHERE comment_of is NULL
+       WHERE comment_of is NULL OR image_content is not NULL
        ${ownerCondition}
        ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint
       `,
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
        JOIN users on owner = users.id
        LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
        WHERE ST_DWithin(posts.location, ST_MakePoint($1::decimal,$2::decimal)::geography, $3::decimal)
-       AND comment_of is NULL
+       AND (comment_of is NULL OR image_content is not NULL) 
        ${ownerCondition}
        ORDER BY posts.location <-> ST_MakePoint($1::decimal,$2::decimal)::geography, created DESC
        LIMIT $4::bigint OFFSET $5::bigint
@@ -76,6 +76,8 @@ export async function POST(req: NextRequest) {
   return Promise.all([sessionPromise, formDataPromise]).then(
     async ([session, formData]) => {
       const dbSession = session as DbSession;
+      
+
       if (!dbSession) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });
       }
@@ -118,6 +120,7 @@ export async function POST(req: NextRequest) {
           lng,
           lat,
           userId,
+          null,
           postedTime,
         ]
       );

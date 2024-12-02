@@ -1,4 +1,5 @@
-import { Dispatch } from "react";
+import dayjs from "dayjs";
+import { Dispatch, useEffect } from "react";
 
 export default function CreatePostForm(props: {
   formData: {
@@ -15,6 +16,10 @@ export default function CreatePostForm(props: {
   }>;
 }) {
   const { formData, setFormData } = props;
+
+  useEffect(() => {
+    console.log(dayjs().format());
+  });
 
   return (
     <div id="create-post-form" className="grid grid-cols-1 gap-4 mb-4">
@@ -60,7 +65,7 @@ export default function CreatePostForm(props: {
           type="datetime-local"
           className="p-2 bg-background-50 border border-text-500 rounded"
           onFocus={(ev) => ev.target.showPicker()}
-          value={formData.postedTime || ""}
+          defaultValue={formData.postedTime || dayjs().format("YYYY-MM-DDTHH:mm")}
           onChange={(ev) => {
             setFormData({ ...formData, postedTime: ev.target.value });
           }}

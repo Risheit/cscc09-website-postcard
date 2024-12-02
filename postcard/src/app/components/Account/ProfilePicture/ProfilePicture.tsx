@@ -14,7 +14,9 @@ export default function ProfilePicture(props: {
   const [isProfileHovered, setIsProfileHovered] = useState(false);
 
   const handleProfilePictureClick = () => {
-    fileInputRef.current?.click();
+    if (isEditable) {
+      fileInputRef.current?.click();
+    }
   };
 
   const handleProfilePictureChange = (event: ChangeEvent<HTMLInputElement>) => {
