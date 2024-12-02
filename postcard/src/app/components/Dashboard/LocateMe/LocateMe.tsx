@@ -28,8 +28,8 @@ export default function LocateMe(props: {
             map.panTo(newCameraLocation);
             map.setZoom(10);
 
-            if (props.setPoi) {
-              props.setPoi({
+            if (setPoi) {
+              setPoi({
                 key: 'poi',
                 location: newCameraLocation,
               });

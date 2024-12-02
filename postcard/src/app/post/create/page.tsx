@@ -47,6 +47,8 @@ export default function Page() {
 
   const [secondStep, setSecondStep] = useState(false);
 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   useEffect(() => {
     // load default camera location
     if (localStorage.getItem('defaultCamera')) {
@@ -90,6 +92,7 @@ export default function Page() {
     });
     const json = await res.json();
     console.log('Post submitted: ', json);
+    setIsSubmitted(true);
     router.push('/dashboard');
   };
 
@@ -230,12 +233,13 @@ export default function Page() {
 
       <div
         style={{ display: secondStep && isImagePost ? 'block' : 'none' }}
-        className="flex w-full place-items-center"
+        className="w-full place-items-center"
       >
         <SimpleCanvasV3
           file={file}
           setFile={setFile}
           setCanvasState={setCanvasState}
+          submitted={isSubmitted}
         />
       </div>
 

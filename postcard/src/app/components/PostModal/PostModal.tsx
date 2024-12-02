@@ -182,8 +182,8 @@ export default function PostModal(props: {
               }}
             >
               <FontAwesomeIcon icon={faRetweet} className="pr-1" />
-              remix of {selectedPost.remix_of_poster_display_name}'s "
-              {selectedPost.remix_of_title}"
+              remix of {selectedPost.remix_of_poster_display_name}&apos;s &quot;
+              {selectedPost.remix_of_title}&quot;
             </div>
           )}
 
@@ -388,7 +388,7 @@ export default function PostModal(props: {
             ))}
             {selectedPost.comments.length > 0 && (
               <div className="text-text-700 text-center italic py-2">
-                you've reached the end of the comments section
+                you&apos;ve reached the end of the comments section
               </div>
             )}
           </div>
