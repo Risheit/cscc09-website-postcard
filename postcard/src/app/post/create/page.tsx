@@ -102,6 +102,8 @@ export default function Page() {
       const imageRes = await fetch(`/api/images/${post.image_content}`);
       const imageBlob = await imageRes.blob();
       setFile(new File([imageBlob], 'remix.png'));
+      setRemixBackground(imageBlob);
+      setCanvasState(imageBlob);
 
       setData({
         locationName: post.location_name,
