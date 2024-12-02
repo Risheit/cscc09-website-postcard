@@ -14,6 +14,8 @@ import LocateMe from '../components/Dashboard/LocateMe/LocateMe';
 
 import { Post } from '../models/post';
 
+const fetchLimit = 15;
+
 export default function Page() {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
@@ -22,7 +24,7 @@ export default function Page() {
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
-    fetch('/api/posts').then(async (res) => {
+    fetch(`/api/posts?limit=${fetchLimit}`).then(async (res) => {
       const p = await res.json();
       console.log('gotten', p);
       const setupPosts = p.map((post: { action?: 'like' | 'dislike'; }) => { return { ...post, local_liked_status: post.action }; });
@@ -97,7 +99,7 @@ export default function Page() {
             <PoiMarkers mapId={DASHBOARD_MAP_ID} posts={posts} />
           </Map>
         </div>
-        <Dashboard posts={posts} setPosts={setPosts} mapId={DASHBOARD_MAP_ID} />
+        <Dashboard postFetchLimits={fetchLimit} posts={posts} setPosts={setPosts} mapId={DASHBOARD_MAP_ID} />
         <LocateMe mapId={DASHBOARD_MAP_ID} />
       </APIProvider>
     </>

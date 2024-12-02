@@ -10,7 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Dispatch, useState } from 'react';
+import { Dispatch, UIEventHandler, useState } from 'react';
 import { useMap } from '@vis.gl/react-google-maps';
 import { useRouter } from 'next/navigation';
 
@@ -67,19 +67,18 @@ function downvoted(post: Post): Post {
 }
 
 export default function Dashboard(props: {
+  postFetchLimits: number;
   posts: Post[];
   setPosts: Dispatch<Post[]>;
   mapId: string;
 }) {
-  const {
-    posts,
-    setPosts,
-    mapId,
-  }: { posts: Post[]; setPosts: Dispatch<Post[]>; mapId: string } = props;
+  const { postFetchLimits, posts, setPosts, mapId } = props;
   const map = useMap(mapId);
 
   const router = useRouter();
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetchingPostDetails, setIsFetchingPostDetails] = useState(false);
+  const [isFetchingPosts, setIsFetchingPosts] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const upvotePost = async (postId: number) => {
     setPosts(
@@ -88,13 +87,13 @@ export default function Dashboard(props: {
       })
     );
 
-    if (isFetching) return;
-    setIsFetching(true);
+    if (isFetchingPostDetails) return;
+    setIsFetchingPostDetails(true);
     await fetch(`/api/posts/${postId}`, {
       method: 'PATCH',
       body: JSON.stringify({ action: 'like' }),
     });
-    setIsFetching(false);
+    setIsFetchingPostDetails(false);
   };
 
   const downvotePost = async (postId: number) => {
@@ -104,13 +103,13 @@ export default function Dashboard(props: {
       })
     );
 
-    if (isFetching) return;
-    setIsFetching(true);
+    if (isFetchingPostDetails) return;
+    setIsFetchingPostDetails(true);
     await fetch(`/api/posts/${postId}`, {
       method: 'PATCH',
       body: JSON.stringify({ action: 'dislike' }),
     });
-    setIsFetching(false);
+    setIsFetchingPostDetails(false);
   };
 
   const [isPostOpen, setIsPostOpen] = useState(false);
@@ -126,10 +125,37 @@ export default function Dashboard(props: {
     setIsPostOpen(false);
   };
 
+  const handleScroll: UIEventHandler<HTMLDivElement> = async (element) => {
+    const target = element.currentTarget;
+    const isAtBottom =
+      Math.abs(
+        target.scrollHeight - (target.scrollTop + target.clientHeight)
+      ) <= 1;
+
+    if (!isAtBottom || isFetchingPosts) return;
+
+    setIsFetchingPosts(true);
+    const res = await fetch(
+      `/api/posts?limit=${postFetchLimits}&offset=${
+        currentPage * postFetchLimits
+      }`
+    );
+    const postJson = await res.json();
+    const newPosts = postJson.map((post: { action?: 'like' | 'dislike' }) => {
+      return { ...post, local_liked_status: post.action };
+    });
+    setIsFetchingPosts(false);
+
+    if (newPosts.length === 0) return;
+    setPosts([...posts, ...newPosts]);
+    setCurrentPage(currentPage + 1);
+  };
+
   return (
     <div
       id="dashboard"
-      className="absolute right-0 p-2 z-10 overflow-y-auto no-scrollbar flex flex-col gap-2"
+      className="absolute right-0 p-2 z-10 overflow-y-auto no-scrollbar flex flex-col gap-2 overscroll-contain"
+      onScroll={handleScroll}
       style={{ width: 'max(400px, 30%)', height: 'calc(100vh - 48px - 8px)' }}
     >
       {posts.map((post) => (
@@ -308,6 +334,17 @@ export default function Dashboard(props: {
           </span>
         </div>
       ))}
+      <div
+        className={`flex justify-center items-center h-full w-full ${
+          isFetchingPosts ? 'hidden' : ''
+        }`}
+      >
+        <img
+          src="/static/loading.svg"
+          alt="loading..."
+          className="w-11 h-11 mt-2 opacity-50"
+        />
+      </div>
       <PostModal
         isPostOpen={isPostOpen}
         selectedPost={selectedPost}
