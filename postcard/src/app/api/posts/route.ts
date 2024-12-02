@@ -76,6 +76,8 @@ export async function POST(req: NextRequest) {
   return Promise.all([sessionPromise, formDataPromise]).then(
     async ([session, formData]) => {
       const dbSession = session as DbSession;
+      
+
       if (!dbSession) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });
       }
@@ -118,6 +120,7 @@ export async function POST(req: NextRequest) {
           lng,
           lat,
           userId,
+          null,
           postedTime,
         ]
       );

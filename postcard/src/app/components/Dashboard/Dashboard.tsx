@@ -10,9 +10,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Dispatch, UIEventHandler, useState } from 'react';
+import { Dispatch, UIEventHandler, useEffect, useState } from 'react';
 import { useMap } from '@vis.gl/react-google-maps';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Post } from '@/app/models/post';
 import PostModal from '../PostModal/PostModal';
@@ -76,8 +76,11 @@ export default function Dashboard(props: {
   const map = useMap(mapId);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [isFetchingPostDetails, setIsFetchingPostDetails] = useState(false);
   const [isFetchingPosts, setIsFetchingPosts] = useState(false);
+  const [isLoadingSpinner, setLoadingSpinner] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const upvotePost = async (postId: number) => {
@@ -125,6 +128,26 @@ export default function Dashboard(props: {
     setIsPostOpen(false);
   };
 
+  useEffect(() => {
+    if (searchParams.has('post')) {
+      const postId = parseInt(searchParams.get('post')!);
+
+      fetch(`/api/posts/${postId}`).then(async (res) => {
+        if (!res.ok) {
+          return;
+        }
+        const post: Post = await res.json();
+        handleOpenModal(post);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoadingSpinner(false);
+    }, 1000);
+  }, [isLoadingSpinner]);
+
   const handleScroll: UIEventHandler<HTMLDivElement> = async (element) => {
     const target = element.currentTarget;
     const isAtBottom =
@@ -132,9 +155,10 @@ export default function Dashboard(props: {
         target.scrollHeight - (target.scrollTop + target.clientHeight)
       ) <= 1;
 
-    if (!isAtBottom || isFetchingPosts) return;
-
+    if (!isAtBottom || isFetchingPosts || isLoadingSpinner) return;
     setIsFetchingPosts(true);
+    setLoadingSpinner(true);
+
     const res = await fetch(
       `/api/posts?limit=${postFetchLimits}&offset=${
         currentPage * postFetchLimits
@@ -147,6 +171,7 @@ export default function Dashboard(props: {
     setIsFetchingPosts(false);
 
     if (newPosts.length === 0) return;
+    setLoadingSpinner(false);
     setPosts([...posts, ...newPosts]);
     setCurrentPage(currentPage + 1);
   };
@@ -304,18 +329,22 @@ export default function Dashboard(props: {
 
             <span className="flex-grow"></span>
 
+            {post.image_content && (
+              <button
+                className="text-primary-500"
+                onClick={() => {
+                  router.push(`/post/create?remixing=${post.id}`);
+                }}
+              >
+                <FontAwesomeIcon icon={faRetweet} />
+              </button>
+            )}
             <button
               className="text-primary-500"
               onClick={() => {
-                router.push(`/post/create?remixing=${post.id}`);
-              }}
-            >
-              <FontAwesomeIcon icon={faRetweet} />
-            </button>
-            <button
-              className="text-primary-500"
-              onClick={() => {
-                // TODO: copy post url to clipboard
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/dashboard?post=${post.id}`
+                );
               }}
             >
               <FontAwesomeIcon icon={faShareFromSquare} />
@@ -334,17 +363,15 @@ export default function Dashboard(props: {
           </span>
         </div>
       ))}
-      <div
-        className={`flex justify-center items-center h-full w-full ${
-          isFetchingPosts ? 'hidden' : ''
-        }`}
-      >
-        <img
-          src="/static/loading.svg"
-          alt="loading..."
-          className="w-11 h-11 mt-2 opacity-50"
-        />
-      </div>
+      {isLoadingSpinner && (
+        <div className={`flex justify-center items-center h-full w-full`}>
+          <img
+            src="/static/loading.svg"
+            alt="loading..."
+            className="w-11 h-11 mt-2 opacity-50"
+          />
+        </div>
+      )}
       <PostModal
         isPostOpen={isPostOpen}
         selectedPost={selectedPost}

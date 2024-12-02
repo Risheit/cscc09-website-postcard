@@ -12,10 +12,19 @@ export async function GET(
   const { id } = await params;
 
   const query = await pool.query(
-    `SELECT ${asReadablePostQuery} FROM posts WHERE id = $1::integer LIMIT 1
+    `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name,
+        users.profile_pic as poster_profile_pic, action
+      FROM posts 
+      JOIN users on owner = users.id
+      LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
+      WHERE posts.id = $1::integer
     `,
     [parseInt(id)]
   );
+
+  if (query.rowCount === 0) {
+    return Response.json({ error: 'Post not found' }, { status: 404 });
+  }
 
   return Response.json(query.rows[0], {
     status: 200,

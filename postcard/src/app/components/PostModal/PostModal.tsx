@@ -266,7 +266,9 @@ export default function PostModal(props: {
             <button
               className="text-primary-500"
               onClick={() => {
-                // TODO: copy post url to clipboard
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/dashboard?post=${selectedPost.id}`
+                );
               }}
             >
               <FontAwesomeIcon icon={faShareFromSquare} />

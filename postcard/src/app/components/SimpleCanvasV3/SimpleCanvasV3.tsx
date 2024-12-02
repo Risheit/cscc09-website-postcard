@@ -36,6 +36,7 @@ export default function SimpleCanvasV3(props: {
   setCanvasState: Dispatch<Blob | null>;
   file: File | null;
   setFile: Dispatch<File | null>;
+  background?: Blob;
 }) {
   const { setCanvasState, file, setFile } = props;
   const [tool, setTool] = useState<Tool>('brush');
@@ -381,6 +382,52 @@ export default function SimpleCanvasV3(props: {
     }
   };
 
+  const setBackgroundImage = (blob: Blob) => {
+    const img = new Image();
+    img.src = URL.createObjectURL(blob);
+    img.onload = () => {
+      console.log(`${img.width} x ${img.height}`);
+
+      setLines([]);
+      setUndoLines([]);
+
+      // scale canvas to image size
+
+      const MAX_SIZE = 500;
+
+      if (img.width > img.height) {
+        console.log('new canvas size', {
+          width: MAX_SIZE,
+          height: (MAX_SIZE / img.width) * img.height,
+        });
+        setCanvasSize({
+          width: MAX_SIZE,
+          height: (MAX_SIZE / img.width) * img.height,
+        });
+      } else {
+        console.log('new canvas size', {
+          width: (MAX_SIZE / img.height) * img.width,
+          height: MAX_SIZE,
+        });
+        setCanvasSize({
+          width: (MAX_SIZE / img.height) * img.width,
+          height: MAX_SIZE,
+        });
+      }
+
+      const bg = document.querySelector('.konvajs-content') as HTMLDivElement;
+      if (!bg) return;
+      bg.style.backgroundImage = `url(${img.src})`;
+    };
+  };
+
+  useEffect(() => {
+    if (props.background) {
+      setBackgroundImage(props.background);
+      setCanvasState(props.background);
+    }
+  }, [props.background]);
+
   return (
     <div className="flex gap-2">
       <div className="flex flex-col place-items-center w-[500px] border border-background-300 rounded-md overflow-hidden shadow-lg">
@@ -405,45 +452,7 @@ export default function SimpleCanvasV3(props: {
           onChange={(e) => {
             if (e.target.files === null || e.target.files.length === 0) return;
             setFile(e.target.files[0]);
-
-            const img = new Image();
-            img.src = URL.createObjectURL(e.target.files[0]);
-            img.onload = () => {
-              console.log(`${img.width} x ${img.height}`);
-
-              setLines([]);
-              setUndoLines([]);
-
-              // scale canvas to image size
-
-              const MAX_SIZE = 500;
-
-              if (img.width > img.height) {
-                console.log('new canvas size', {
-                  width: MAX_SIZE,
-                  height: (MAX_SIZE / img.width) * img.height,
-                });
-                setCanvasSize({
-                  width: MAX_SIZE,
-                  height: (MAX_SIZE / img.width) * img.height,
-                });
-              } else {
-                console.log('new canvas size', {
-                  width: (MAX_SIZE / img.height) * img.width,
-                  height: MAX_SIZE,
-                });
-                setCanvasSize({
-                  width: (MAX_SIZE / img.height) * img.width,
-                  height: MAX_SIZE,
-                });
-              }
-
-              const bg = document.querySelector(
-                '.konvajs-content'
-              ) as HTMLDivElement;
-              if (!bg) return;
-              bg.style.backgroundImage = `url(${img.src})`;
-            };
+            setBackgroundImage(e.target.files[0]);
           }}
         ></input>
         <div className="w-full h-10 flex place-items-center gap-1 p-1">
@@ -571,7 +580,7 @@ export default function SimpleCanvasV3(props: {
             <FontAwesomeIcon icon={faRedo} />
           </button>
 
-          <button onClick={() => fileUploadRef.current?.click()}>
+          <button onClick={() => fileUploadRef.current?.click()} disabled={!!props.background}>
             <FontAwesomeIcon icon={faUpload} />
           </button>
 
