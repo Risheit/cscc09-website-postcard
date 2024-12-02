@@ -231,8 +231,8 @@ export default function Dashboard(props: {
               }}
             >
               <FontAwesomeIcon icon={faRetweet} className="pr-1" />
-              remix of {post.remix_of_poster_display_name}'s "
-              {post.remix_of_title}"
+              remix of {post.remix_of_poster_display_name}&apos;s &quot;
+              {post.remix_of_title}&quot;
             </div>
           )}
           <div

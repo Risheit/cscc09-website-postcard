@@ -1,8 +1,4 @@
-import {
-  APIProvider,
-  Map,
-  MapCameraChangedEvent,
-} from '@vis.gl/react-google-maps';
+import { APIProvider, Map } from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
 import { PoiMarker } from './markers';
 import { Modal } from 'react-bootstrap';

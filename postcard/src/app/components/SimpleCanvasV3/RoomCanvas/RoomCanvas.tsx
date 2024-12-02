@@ -1,6 +1,6 @@
-import { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
-import './SimpleCanvasV3.css';
+import './RoomCanvas.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -12,14 +12,11 @@ import {
   faPlus,
   faUndo,
   faRedo,
-  faUpload,
   faSave,
-  faCircleNodes,
-  faTimes,
   faCopy,
 } from '@fortawesome/free-solid-svg-icons';
 import { KonvaEventObject, Node, NodeConfig } from 'konva/lib/Node';
-import { Message } from './message';
+import { Message } from '../message';
 import useDbSession from '@/app/hooks/useDbSession';
 import { randomBytes } from 'crypto';
 import { Toast } from 'react-bootstrap';
@@ -35,13 +32,11 @@ type DrawingLine = {
 };
 type Colour = string; // hex, e.g. "#000000"
 
-export default function SimpleCanvasV3(props: {
-  setCanvasState: Dispatch<Blob | null>;
+export default function RoomCanvas(props: {
   file: File | null;
-  setFile: Dispatch<File | null>;
-  submitted: boolean;
+  roomId: string;
 }) {
-  const { setCanvasState, file, setFile, submitted } = props;
+  const { file, roomId } = props;
   const [tool, setTool] = useState<Tool>('brush');
   const [lines, setLines] = useState<DrawingLine[]>([]);
   const [strokeId, setStrokeId] = useState<string>('');
@@ -61,16 +56,11 @@ export default function SimpleCanvasV3(props: {
 
   const [currentStroke, setCurrentStroke] = useState<number[]>([]);
 
-  const fileUploadRef = useRef<HTMLInputElement>(null);
-
   const session = useDbSession();
   const userId = session.data?.dbUser?.id ?? '';
   const username = session.data?.dbUser?.displayName;
 
   const [ws, setWs] = useState<WebSocket | null>(null);
-
-  const [roomId, setRoomId] = useState<string>('default');
-  const [roomStartLoading, setRoomStartLoading] = useState(false);
 
   const [wsRetries, setWsRetries] = useState(0);
   const [retrying, setRetrying] = useState(false);
@@ -79,19 +69,63 @@ export default function SimpleCanvasV3(props: {
   // toast for room link copy
   const [showToast, setShowToast] = useState(false);
 
+  const [isClosed, setIsClosed] = useState(false);
+
+  // load image and websocket
   useEffect(() => {
-    if (!submitted) return;
-    // console.log('submitted', submitted);
-    wsSend(roomId, 'close');
-  }, [submitted]);
+    if (!file) return;
+
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      console.log(`${img.width} x ${img.height}`);
+
+      setLines([]);
+      setUndoLines([]);
+
+      // scale canvas to image size
+
+      const MAX_SIZE = 500;
+
+      if (img.width > img.height) {
+        console.log('new canvas size', {
+          width: MAX_SIZE,
+          height: (MAX_SIZE / img.width) * img.height,
+        });
+        setCanvasSize({
+          width: MAX_SIZE,
+          height: (MAX_SIZE / img.width) * img.height,
+        });
+      } else {
+        console.log('new canvas size', {
+          width: (MAX_SIZE / img.height) * img.width,
+          height: MAX_SIZE,
+        });
+        setCanvasSize({
+          width: (MAX_SIZE / img.height) * img.width,
+          height: MAX_SIZE,
+        });
+      }
+
+      const bg = document.querySelector('.konvajs-content') as HTMLDivElement;
+      if (!bg) return;
+      bg.style.backgroundImage = `url(${img.src})`;
+
+      setWs(
+        new WebSocket(
+          process.env.NODE_ENV === 'production'
+            ? `wss://${process.env.NEXT_PUBLIC_BASEURL}/api/ws`
+            : `ws://${process.env.NEXT_PUBLIC_BASEURL}/api/ws`
+        )
+      );
+    };
+  }, [file]);
 
   const handleMouseDown = (
     e:
       | KonvaEventObject<TouchEvent, Node<NodeConfig>>
       | KonvaEventObject<MouseEvent, Node<NodeConfig>>
   ) => {
-    if (roomStartLoading) return;
-
     isDrawing.current = true;
 
     const stage = e.target.getStage();
@@ -137,8 +171,6 @@ export default function SimpleCanvasV3(props: {
       | KonvaEventObject<TouchEvent, Node<NodeConfig>>
       | KonvaEventObject<MouseEvent, Node<NodeConfig>>
   ) => {
-    if (roomStartLoading) return;
-
     if (!isDrawing.current) return;
 
     const stage = e.target.getStage();
@@ -168,9 +200,9 @@ export default function SimpleCanvasV3(props: {
         // set max retries to 5
         if (wsRetries < MAX_WS_RETRIES) {
           setWsRetries(wsRetries + 1);
-          // console.log('retrying...', wsRetries + 1, retrying, roomId, action);
+          console.log('retrying...', wsRetries + 1, retrying, roomId, action);
         } else {
-          // console.log('max retries reached');
+          console.log('max retries reached');
           return;
         }
         if (retrying) return;
@@ -239,14 +271,15 @@ export default function SimpleCanvasV3(props: {
         });
       }
       setLines(strokes);
-      setRoomStartLoading(false);
+    } else if (message.action === 'close') {
+      setIsClosed(true);
     }
   }, []);
 
   // manages websocket connection
   useEffect(() => {
     if (ws === null) return;
-    // console.log('ws effect', ws, roomId);
+    console.log('ws effect', ws, roomId);
 
     setWs((ws) => {
       if (ws === null) return ws;
@@ -263,7 +296,7 @@ export default function SimpleCanvasV3(props: {
         return ws;
       });
       wsSend(roomId, 'leave');
-      // console.log('closing ws');
+      console.log('closing ws');
     };
   }, [ws, roomId, wsSend]);
 
@@ -323,39 +356,11 @@ export default function SimpleCanvasV3(props: {
   }, [showCursor, mousePos, canvasSize]);
   // end of cursor code //////////////////////////////
 
-  // called when file is changed to null
-  const resetEditor = () => {
-    console.log('resetting editor');
-    setLines([]);
-    setUndoLines([]);
-    setCanvasSize({ width: 500, height: 500 });
-
-    // reset upload input
-    const upload = fileUploadRef.current;
-    if (!upload) return;
-    upload.value = '';
-
-    // remove background image
-    const bg = document.querySelector('.konvajs-content') as HTMLDivElement;
-    if (!bg) return;
-    bg.style.backgroundImage = '';
-  };
-
-  // if file is changed to null, reset canvas
-  useEffect(() => {
-    if (file === null) {
-      resetEditor();
-    } else {
-      setBackground(file);
-    }
-  }, [file]);
-
   useEffect(() => {
     const canvas: HTMLCanvasElement | null = document.querySelector(
       '#canvas-stage > div > canvas'
     );
     if (!canvas) {
-      setCanvasState(null);
       return;
     }
 
@@ -371,7 +376,6 @@ export default function SimpleCanvasV3(props: {
       oldCanvas.src = canvas.toDataURL();
       oldCanvas.onload = () => {
         newCtx.drawImage(oldCanvas, 0, 0, canvasSize.width, canvasSize.height);
-        newCanvas.toBlob(setCanvasState);
       };
     };
 
@@ -432,125 +436,14 @@ export default function SimpleCanvasV3(props: {
     }
   };
 
-  const setBackground = (image: File) => {
-    const img = new Image();
-    img.src = URL.createObjectURL(image);
-    img.onload = () => {
-      console.log(`${img.width} x ${img.height}`);
-
-      setLines([]);
-      setUndoLines([]);
-
-      // scale canvas to image size
-
-      const MAX_SIZE = 500;
-
-      if (img.width > img.height) {
-        console.log('new canvas size', {
-          width: MAX_SIZE,
-          height: (MAX_SIZE / img.width) * img.height,
-        });
-        setCanvasSize({
-          width: MAX_SIZE,
-          height: (MAX_SIZE / img.width) * img.height,
-        });
-      } else {
-        console.log('new canvas size', {
-          width: (MAX_SIZE / img.height) * img.width,
-          height: MAX_SIZE,
-        });
-        setCanvasSize({
-          width: (MAX_SIZE / img.height) * img.width,
-          height: MAX_SIZE,
-        });
-      }
-
-      const bg = document.querySelector('.konvajs-content') as HTMLDivElement;
-      if (!bg) return;
-      bg.style.backgroundImage = `url(${img.src})`;
-    };
-  };
-
-  return (
+  return isClosed ? (
+    <p className="text-text-800 italic py-4">This room is now closed.</p>
+  ) : (
     <>
-      <div className="flex gap-2 mb-2">
-        <button
-          className={
-            ws !== null || roomStartLoading
-              ? 'inline bg-background-200 px-3'
-              : 'inline bg-background-200 px-3 disabled:bg-transparent border !border-transparent disabled:!border-background-200'
-          }
-          disabled={!file || ws !== null || roomStartLoading}
-          onClick={() => {
-            if (ws !== null) return;
-            setFile(null);
-          }}
-        >
-          <FontAwesomeIcon icon={faTimes} />
-        </button>
-        <button
-          className="inline bg-background-200 py-2 px-4"
-          disabled={ws !== null || roomStartLoading}
-          onClick={() => {
-            if (ws !== null) return;
-            fileUploadRef.current?.click();
-          }}
-        >
-          upload an image <FontAwesomeIcon className="pl-1" icon={faUpload} />
-        </button>
-        <button
-          className={
-            ws !== null || roomStartLoading || lines.length > 0
-              ? 'inline bg-background-200 py-2 px-4'
-              : 'inline bg-primary-600 py-2 px-4 disabled:bg-transparent border !border-transparent disabled:!border-background-200'
-          }
-          disabled={
-            !file || ws !== null || roomStartLoading || lines.length > 0
-          }
-          onClick={async () => {
-            if (!file || lines.length > 0) return;
-
-            setRoomStartLoading(true);
-
-            const formData = new FormData();
-
-            formData.append('image', file);
-
-            const res = await fetch('/api/room/create', {
-              method: 'POST',
-              body: formData,
-            });
-
-            const json = await res.json();
-
-            console.log('Room created: ', json);
-
-            setRoomId(json.roomId);
-
-            setWs(
-              new WebSocket(
-                process.env.NODE_ENV === 'production'
-                  ? `wss://${process.env.NEXT_PUBLIC_BASEURL}/api/ws`
-                  : `ws://${process.env.NEXT_PUBLIC_BASEURL}/api/ws`
-              )
-            );
-
-            fetch(`/api/images/${json.imageId}`).then((res) => {
-              if (!res.ok) return;
-              res.blob().then((blob) => {
-                setFile(new File([blob], 'image.png'));
-              });
-            });
-          }}
-        >
-          start a room <FontAwesomeIcon className="pl-1" icon={faCircleNodes} />
-        </button>
-      </div>
-
       <div className="flex flex-col gap-2 pb-2">
         <span>
           {ws === null
-            ? ''
+            ? 'Not connected'
             : ws.readyState === ws.CONNECTING
             ? 'Connecting...'
             : ws.readyState === ws.OPEN
@@ -599,18 +492,6 @@ export default function SimpleCanvasV3(props: {
               }}
             ></div>
           )}
-          <input
-            id="file-upload"
-            ref={fileUploadRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files === null || e.target.files.length === 0)
-                return;
-              setFile(e.target.files[0]);
-            }}
-          ></input>
           <div className="w-full h-10 flex place-items-center gap-1 p-1">
             <button
               disabled={lines.length === 0 && file === null}

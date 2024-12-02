@@ -1,22 +1,22 @@
 import pool from './cloudsql';
 
 export type Room = {
-  id: string;
-  name: string;
+  roomId: string;
+  imageId: string;
 };
 
-export function fromRawRoom(roomRaw?: { room_id: string; room_name: string }) {
+export function fromRawRoom(roomRaw?: { id: string; image_content: string }) {
   return roomRaw
     ? ({
-        id: roomRaw?.room_id,
-        name: roomRaw?.room_name,
+        roomId: roomRaw?.id,
+        imageId: roomRaw?.image_content,
       } as Room)
     : undefined;
 }
 
 export async function getImageConnectedToRoom(roomId: string) {
   const imageRaw = await pool.query(
-    'SELECT * FROM rooms WHERE room_id = $1::text LIMIT 1',
+    'SELECT * FROM rooms WHERE id = $1::text LIMIT 1',
     [roomId]
   );
 

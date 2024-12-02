@@ -34,7 +34,6 @@ export default function Page() {
   const [canvasState, setCanvasState] = useState<Blob | null>(null);
   const [remixedPost, setRemixedPost] = useState<Post>();
   const [isRemix, setIsRemix] = useState(false);
-  const [remixBackground, setRemixBackground] = useState<Blob>();
 
   const [poi, setPoi] = useState({
     key: 'poi',
@@ -52,6 +51,8 @@ export default function Page() {
   const CREATE_POST_MAP_ID = 'create-post-map';
 
   const [secondStep, setSecondStep] = useState(false);
+
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -102,7 +103,6 @@ export default function Page() {
       const imageRes = await fetch(`/api/images/${post.image_content}`);
       const imageBlob = await imageRes.blob();
       setFile(new File([imageBlob], 'remix.png'));
-      setRemixBackground(imageBlob);
       setCanvasState(imageBlob);
 
       setData({
@@ -158,6 +158,8 @@ export default function Page() {
     const post: Post = await res.json();
     console.log('Post submitted: ', post);
     router.push(`/dashboard?post=${post.id}`);
+    setIsSubmitted(true);
+    router.push('/dashboard');
   };
 
   return (
@@ -321,19 +323,17 @@ export default function Page() {
         </p>
       )}
 
-      {isLoaded && (
-        <div
-          style={{ display: secondStep && isImagePost ? 'block' : 'none' }}
-          className="flex w-full place-items-center"
-        >
-          <SimpleCanvasV3
-            file={file}
-            setFile={setFile}
-            setCanvasState={setCanvasState}
-            background={remixBackground}
-          />
-        </div>
-      )}
+      <div
+        style={{ display: secondStep && isImagePost ? 'block' : 'none' }}
+        className="w-full place-items-center"
+      >
+        <SimpleCanvasV3
+          file={file}
+          setFile={setFile}
+          setCanvasState={setCanvasState}
+          submitted={isSubmitted}
+        />
+      </div>
 
       {isLoaded && secondStep && (
         <CreatePostForm formData={data} setFormData={setData} />
