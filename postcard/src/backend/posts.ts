@@ -1,9 +1,9 @@
 import pool from "./cloudsql";
 
 export const asReadablePostQuery = `
-    posts.id, title, text_content, image_content, created, likes, dislikes, owner,
-      num_comments, comment_of, posted_time, location_name,
-      ST_X(location::geometry) AS lng, ST_Y(location::geometry) as lat
+    posts.id, posts.title, posts.text_content, posts.image_content, posts.created, posts.likes, posts.dislikes, posts.owner,
+      posts.num_comments, posts.comment_of, posts.posted_time, posts.location_name,
+      ST_X(posts.location::geometry) AS lng, ST_Y(posts.location::geometry) as lat
 `;
 
 export function getNumberOfCommentsOnPost(postId: number) {
