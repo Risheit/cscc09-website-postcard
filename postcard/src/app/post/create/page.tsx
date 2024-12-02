@@ -324,8 +324,8 @@ export default function Page() {
       )}
 
       <div
-        style={{ display: secondStep && isImagePost ? 'block' : 'none' }}
-        className="w-full place-items-center"
+        style={{ display: secondStep && isImagePost ? 'flex' : 'none' }}
+        className="w-full flex-col place-items-center"
       >
         <SimpleCanvasV3
           file={file}
