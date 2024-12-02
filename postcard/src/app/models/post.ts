@@ -19,5 +19,11 @@ export type Post = {
   likes: number;
   dislikes: number;
   num_comments: number;
-  local_liked_status?: "like" | "dislike";
+  local_liked_status?: 'like' | 'dislike';
+
+  // TODO: replace mock remix fields with actual remix fields
+  remix_of?: number;
+  remix_of_poster_display_name?: string;
+  remix_of_poster_profile_pic?: string;
+  remix_of_title?: string;
 };

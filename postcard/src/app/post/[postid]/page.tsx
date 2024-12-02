@@ -1,4 +1,0 @@
-export default function Page({ params }: { params: { postid: string } }) {
-  // TODO NOTE TO SELF: DO NOT FORGET TO VALIDATE THE ID
-  return <div>Post ID: {params.postid}</div>;
-}

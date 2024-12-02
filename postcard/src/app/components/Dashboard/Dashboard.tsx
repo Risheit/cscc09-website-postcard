@@ -170,6 +170,20 @@ export default function Dashboard(props: {
               })}
             </span>
           </div>
+
+          {post.remix_of && (
+            <div
+              className="text-xs text-primary-400 font-medium italic hover:bg-background-200 active:bg-background-300 rounded-md cursor-pointer"
+              onClick={() => {
+                // TODO: replace with api call to get post
+                handleOpenModal(posts.find((p) => p.id === post.remix_of)!);
+              }}
+            >
+              <FontAwesomeIcon icon={faRetweet} className="pr-1" />
+              remix of {post.remix_of_poster_display_name}'s "
+              {post.remix_of_title}"
+            </div>
+          )}
           <div
             className="flex place-items-center justify-between gap-2 text-text-800 text-xs font-light hover:bg-background-200 active:bg-background-300 rounded-md cursor-pointer"
             onClick={() => {
@@ -211,7 +225,7 @@ export default function Dashboard(props: {
               onClick={() => {
                 handleOpenModal(post);
               }}
-              className="h-4 mb-2"
+              className="h-4 mb-2 cursor-pointer"
             >
               {post.title}
             </div>
@@ -220,39 +234,37 @@ export default function Dashboard(props: {
             onClick={() => {
               handleOpenModal(post);
             }}
-            className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600"
+            className="text-text-800 text-sm font-light px-2 border-l-2 border-l-primary-600 cursor-pointer"
           >
             {post.text_content}
           </div>
 
           <div className="flex place-items-center gap-2">
             <button
-              className="text-primary-500 inline whitespace-nowrap"
+              className={`inline whitespace-nowrap ${
+                post.local_liked_status === 'like'
+                  ? 'text-primary-700'
+                  : 'text-primary-500'
+              }`}
               onClick={() => {
                 upvotePost(post.id);
               }}
             >
               {post.likes}
-              <FontAwesomeIcon
-                icon={faThumbsUp}
-                className={`pl-1 ${
-                  post.local_liked_status === 'like' ? 'text-orange-900' : ''
-                }`}
-              />
+              <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
             </button>
             <button
-              className="text-primary-500 inline whitespace-nowrap"
+              className={`inline whitespace-nowrap ${
+                post.local_liked_status === 'dislike'
+                  ? 'text-primary-700'
+                  : 'text-primary-500'
+              }`}
               onClick={() => {
                 downvotePost(post.id);
               }}
             >
               {post.dislikes}
-              <FontAwesomeIcon
-                icon={faThumbsDown}
-                className={`pl-1 ${
-                  post.local_liked_status === 'dislike' ? 'text-orange-900' : ''
-                }`}
-              />
+              <FontAwesomeIcon icon={faThumbsDown} className="pl-1" />
             </button>
             <button
               className="text-primary-500 inline whitespace-nowrap"
@@ -269,7 +281,7 @@ export default function Dashboard(props: {
             <button
               className="text-primary-500"
               onClick={() => {
-                router.push(`/post/${post.id}/remix`);
+                router.push(`/post/create?remixing=${post.id}`);
               }}
             >
               <FontAwesomeIcon icon={faRetweet} />
@@ -299,6 +311,7 @@ export default function Dashboard(props: {
       <PostModal
         isPostOpen={isPostOpen}
         selectedPost={selectedPost}
+        setSelectedPost={setSelectedPost}
         upvotePost={(postId) => {
           const post = posts.find((post) => post.id === postId);
           if (post) {

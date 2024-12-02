@@ -197,6 +197,7 @@ export default function Page() {
           <LocateMe
             mapId={CREATE_POST_MAP_ID}
             className="top-0 text-text-900"
+            setPoi={setPoi}
           />
         </div>
       </APIProvider>
@@ -245,7 +246,7 @@ export default function Page() {
         style={{ display: secondStep ? 'grid' : 'none' }}
       >
         <button
-          className="p-2 bg-background-200 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
+          className="p-2 bg-background-200 rounded flex-none disabled:bg-background-100 disabled:border"
           onClick={() => {
             setFile(null);
             setData({
@@ -261,7 +262,7 @@ export default function Page() {
           back
         </button>
         <button
-          className="p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
+          className="p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:border"
           disabled={
             data.locationName === '' ||
             data.title === '' ||

@@ -1,11 +1,10 @@
-"use client";
-import Link from "next/link";
-import { faMapLocationDot, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
-import useDbSession from "@/app/hooks/useDbSession";
-
+'use client';
+import Link from 'next/link';
+import { faMapLocationDot, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import useDbSession from '@/app/hooks/useDbSession';
 
 export default function Header() {
   const router = useRouter();
@@ -22,8 +21,8 @@ export default function Header() {
     //   router.push("/api/auth/signin");
     // }
 
-    if (pathname === "/" && session.data?.dbUser) {
-      router.replace("/dashboard");
+    if (pathname === '/' && session.data?.dbUser) {
+      router.replace('/dashboard');
     }
   });
 
@@ -39,16 +38,20 @@ export default function Header() {
 
       {/* if route is not /post/create, show create post button */}
       {session.data?.dbUser && (
-        <button
-          className="absolute bg-primary-400 hover:bg-primary-500 px-4 inline"
+        <div
+          className="absolute flex gap-2"
           style={{ left: '50%', transform: 'translateX(-50%)' }} // perfectly centered :)
-          onClick={() => {
-            router.push('/post/create');
-          }}
         >
-          <FontAwesomeIcon icon={faPlus} />
-          <span className="pl-2">create post</span>
-        </button>
+          <button
+            className="bg-primary-400 hover:bg-primary-500 px-4 inline"
+            onClick={() => {
+              router.push('/post/create');
+            }}
+          >
+            <FontAwesomeIcon icon={faPlus} />
+            <span className="pl-2">create post</span>
+          </button>
+        </div>
       )}
 
       {/* if not logged in */}
@@ -88,7 +91,9 @@ export default function Header() {
                 <span className="rounded-full h-6 w-6 bg-text-900"></span>
               )}
             </span>
-            <span className="pl-2">Hello, {session.data?.dbUser?.displayName}</span>
+            <span className="pl-2">
+              Hello, {session.data?.dbUser?.displayName}
+            </span>
           </Link>
           <button
             className="bg-secondary-100 px-4 border-background-300"
