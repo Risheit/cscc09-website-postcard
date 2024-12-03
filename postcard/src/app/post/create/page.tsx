@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 import { faImage, faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,7 +25,19 @@ const SimpleCanvasV3 = dynamic(
   }
 );
 
-export default function Page() {
+import { FC } from 'react';
+
+const Page: FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreatePostPage />
+    </Suspense>
+  );
+};
+
+export default Page;
+
+const CreatePostPage: FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -381,4 +393,4 @@ export default function Page() {
       )}
     </div>
   );
-}
+};

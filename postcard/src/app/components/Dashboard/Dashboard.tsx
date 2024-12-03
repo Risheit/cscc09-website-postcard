@@ -10,19 +10,42 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { Dispatch, UIEventHandler, useEffect, useState } from 'react';
+import { Dispatch, Suspense, UIEventHandler, useEffect, useState } from 'react';
 import { useMap } from '@vis.gl/react-google-maps';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { downvoted, fromRaw, Post, upvoted } from '@/app/models/post';
 import PostModal from '../PostModal/PostModal';
 
-export default function Dashboard(props: {
+import { FC } from 'react';
+
+const Dashboard: FC<{
   postFetchLimits: number;
   posts: Post[];
   setPosts: Dispatch<Post[]>;
   mapId: string;
-}) {
+}> = (props) => {
+  const { postFetchLimits, posts, setPosts, mapId } = props;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent
+        postFetchLimits={postFetchLimits}
+        posts={posts}
+        setPosts={setPosts}
+        mapId={mapId}
+      />
+    </Suspense>
+  );
+};
+
+export default Dashboard;
+
+const DashboardContent: FC<{
+  postFetchLimits: number;
+  posts: Post[];
+  setPosts: Dispatch<Post[]>;
+  mapId: string;
+}> = (props) => {
   const { postFetchLimits, posts, setPosts, mapId } = props;
   const map = useMap(mapId);
 
@@ -247,9 +270,7 @@ export default function Dashboard(props: {
           <div className="flex place-items-center gap-2">
             <button
               className={`inline whitespace-nowrap ${
-                post.action === 'like'
-                  ? 'text-primary-700'
-                  : 'text-primary-500'
+                post.action === 'like' ? 'text-primary-700' : 'text-primary-500'
               }`}
               onClick={() => {
                 upvotePost(post.id);
@@ -350,4 +371,4 @@ export default function Dashboard(props: {
       />
     </div>
   );
-}
+};
