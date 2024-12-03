@@ -28,8 +28,10 @@ export async function GET(req: NextRequest) {
     query = await pool.query(
       `SELECT  ${asReadablePostQuery}, users.display_name as poster_display_name,
         users.profile_pic as poster_profile_pic, action, parent.title as remix_of_title, parent.id as remix_of,
-        original.display_name as remix_of_poster_display_name, original.profile_pic as remix_of_poster_profile_pic
-       FROM posts
+        original.display_name as remix_of_poster_display_name, original.profile_pic as remix_of_poster_profile_pic,
+        users.external_profile_pic as poster_external_profile_pic, 
+        original.external_profile_pic as remix_of_poster_external_profile_pic
+      FROM posts
        JOIN users on posts.owner = users.id
        LEFT OUTER JOIN posts as parent on parent.id = posts.comment_of
        LEFT OUTER JOIN users as original on parent.owner = original.id

@@ -41,6 +41,7 @@ export default function OAuthSignUp(props: {
             setFormData({ ...formData, name: ev.target.value });
             setFormInvalid(!ev.target.value);
           }}
+          maxLength={30}
           required
         />
       </label>

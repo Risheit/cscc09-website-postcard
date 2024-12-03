@@ -12,7 +12,7 @@ import { PoiMarkers } from './markers';
 import Dashboard from '../components/Dashboard/Dashboard';
 import LocateMe from '../components/Dashboard/LocateMe/LocateMe';
 
-import { Post } from '../models/post';
+import { fromRaw, Post } from '../models/post';
 
 const fetchLimit = 15;
 
@@ -27,7 +27,7 @@ export default function Page() {
     fetch(`/api/posts?limit=${fetchLimit}`).then(async (res) => {
       const p = await res.json();
       console.log('gotten', p);
-      const setupPosts = p.map((post: { action?: 'like' | 'dislike'; }) => { return { ...post, local_liked_status: post.action }; });
+      const setupPosts = p.map(fromRaw);
       console.log('setup', setupPosts);
       setPosts(setupPosts);
     });

@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import bcrypt from 'bcrypt';
 
 const saltRounds = 10;
-const testWhitespace = /\s/g;
+const testWhitespace = /\s/gm;
 
 export async function PUT(req: NextRequest) {
   const { username, displayName, credentials } = await req.json();
