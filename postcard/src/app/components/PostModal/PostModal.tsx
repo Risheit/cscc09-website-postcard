@@ -13,10 +13,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Modal } from 'react-bootstrap';
 
-import { Post } from '@/app/models/post';
+import { downvoted, fromRaw, Post, upvoted } from '@/app/models/post';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MapModal from '../MapModal/MapModal';
+import { faComment } from '@fortawesome/free-regular-svg-icons';
 
 export default function PostModal(props: {
   isPostOpen: boolean;
@@ -43,38 +44,60 @@ export default function PostModal(props: {
   } = props;
   const router = useRouter();
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [comments, setComments] = useState<Post[]>([]);
   const [mapModalLoc, setMapModalLoc] = useState({
     lat: 0,
     lng: 0,
   });
+  const [isFetching, setIsFetching] = useState(false);
 
-  // inject mock comments
-  // TODO: replace with api call to get comments
-  if (selectedPost && selectedPost.id === 7) {
-    selectedPost.comments = [
-      {
-        id: 1,
-        display_name: 'john_doe',
-        profile_pic: 'https://picsum.photos/200/200?random=1',
-        text: 'This is a comment.',
-        likes: 10,
-        dislikes: 2,
-      },
-      {
-        id: 2,
-        display_name: 'bob',
-        profile_pic: '',
-        text: 'remixed the post!',
-        remix: 'postid...',
-        remix_link: 'https://picsum.photos/600/400?random=1',
-        remix_title: "bob's remix haha",
-        likes: 5,
-        dislikes: 1,
-      },
-    ];
-  } else if (selectedPost) {
-    selectedPost.comments = [];
-  }
+  const upvoteComment = async (postId: number) => {
+    setComments(
+      comments.map((comment) => {
+        return comment.id === postId ? upvoted(comment) : comment;
+      })
+    );
+
+    if (isFetching) return;
+    setIsFetching(true);
+    await fetch(`/api/posts/${postId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'like' }),
+    });
+    setIsFetching(false);
+  };
+
+  const downvoteComment = async (postId: number) => {
+    setComments(
+      comments.map((comment) => {
+        return comment.id === postId ? downvoted(comment) : comment;
+      })
+    );
+
+    if (isFetching) return;
+    setIsFetching(true);
+    await fetch(`/api/posts/${postId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'dislike' }),
+    });
+    setIsFetching(false);
+  };
+
+  useEffect(() => {
+    if (!selectedPost) return;
+
+    console.log(`/api/posts/${selectedPost.id}/comments`);
+    fetch(`/api/posts/${selectedPost.id}/comments`).then(async (res) => {
+      if (!res.ok) {
+        console.error('Failed to fetch comments:', res.statusText);
+        return;
+      }
+
+      const comments = await res.json();
+      console.log('comments:', comments);
+      setComments(comments.map(fromRaw));
+    });
+  }, [selectedPost, comments]);
 
   return isPostOpen && selectedPost ? (
     <Modal show={isPostOpen} onHide={handleCloseModal} centered>
@@ -162,23 +185,20 @@ export default function PostModal(props: {
             <div
               className="text-xs text-primary-400 font-medium italic hover:bg-background-200 active:bg-background-300 rounded-md cursor-pointer"
               onClick={() => {
-                // TODO: replace with api call to get post
-                setSelectedPost({
-                  id: 7,
-                  owner: 3,
-                  poster_display_name: 'alice',
-                  title: 'Greetings from Paris',
-                  image_content: 'https://picsum.photos/600/400?random=1',
-                  text_content: 'Enjoying the beautiful sights of Paris!',
-                  location_name: 'Eiffel Tower',
-                  lat: 48.8584,
-                  lng: 2.2945,
-                  posted_time: new Date(2021, 5, 15, 10, 30),
-                  created: new Date(2021, 5, 16, 11, 45),
-                  likes: 120,
-                  dislikes: 5,
-                  num_comments: 0,
-                });
+                fetch(`/api/posts/${selectedPost.remix_of}`).then(
+                  async (res) => {
+                    if (!res.ok) {
+                      console.error(
+                        'Failed to fetch remix post:',
+                        res.statusText
+                      );
+                      return;
+                    }
+
+                    const remixPost: Post = fromRaw(await res.json());
+                    setSelectedPost(remixPost);
+                  }
+                );
               }}
             >
               <FontAwesomeIcon icon={faRetweet} className="pr-1" />
@@ -224,7 +244,7 @@ export default function PostModal(props: {
           <div className="flex place-items-center gap-2">
             <button
               className={`inline whitespace-nowrap ${
-                selectedPost.local_liked_status === 'like'
+                selectedPost.action === 'like'
                   ? 'text-primary-700'
                   : 'text-primary-500'
               }`}
@@ -237,7 +257,7 @@ export default function PostModal(props: {
             </button>
             <button
               className={`inline whitespace-nowrap ${
-                selectedPost.local_liked_status === 'dislike'
+                selectedPost.action === 'dislike'
                   ? 'text-primary-700'
                   : 'text-primary-500'
               }`}
@@ -289,110 +309,192 @@ export default function PostModal(props: {
           <hr className="border-t border-gray-300 mx-auto w-1/2" />
 
           <h1 className="mb-2">comments</h1>
-          <div className="flex flex-col gap-2 overflow-y-auto max-h-[50vh] no-scrollbar">
+          <div className="flex flex-col gap-2 overflow-y-auto max-h-[50vh] h-full no-scrollbar">
             <div className="mt-2"></div>
-            {selectedPost.comments.length === 0 && (
+            {comments.length === 0 && (
               <div className="text-text-700 text-center italic">
                 no comments yet.
               </div>
             )}
-            {selectedPost.comments.map((comment) => (
-              <div key={comment.id} className="flex gap-2">
-                {comment.profile_pic ? (
-                  <img
-                    src={comment.profile_pic}
-                    alt="profile"
-                    className="flex-none rounded-full w-6 h-6 select-none"
-                  />
-                ) : (
-                  <span className="flex-none rounded-full w-6 h-6 bg-primary-600"></span>
-                )}
-                <div className="flex flex-col flex-grow">
-                  <div className="flex justify-between">
-                    <span className="text-primary-600 font-medium">
-                      {comment.display_name}
-                    </span>
-                    <span className="text-xs text-text-400 italic">
-                      {new Date().toLocaleString('en-US', {
-                        year: '2-digit',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: 'numeric',
-                        minute: 'numeric',
-                      })}
+            {comments
+              .map(fromRaw)
+              .map(fromRaw)
+              .map((comment) => (
+                <div key={comment.id} className="flex gap-2">
+                  {comment.poster_profile_pic ? (
+                    <img
+                      src={comment.poster_profile_pic}
+                      alt="profile"
+                      className="flex-none rounded-full w-6 h-6 select-none object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/static/default_profile.jpg';
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src="/static/default_profile.jpg"
+                      alt="profile"
+                      className="flex-none rounded-full w-6 h-6 select-none object-cover"
+                    />
+                  )}
+                  <div className="flex flex-col flex-grow">
+                    <div className="flex justify-between">
+                      <span className="text-primary-600 font-medium">
+                        {comment.poster_display_name}
+                      </span>
+                      <span className="text-xs text-text-400 italic">
+                        {new Date().toLocaleString('en-US', {
+                          year: '2-digit',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: 'numeric',
+                          minute: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-text-800 text-sm flex ${
+                        comment.image_content ? 'flex-col' : 'justify-between'
+                      }`}
+                    >
+                      {comment.image_content ? (
+                        <span
+                          className="group text-primary-400 font-medium italic bg-background-200 active:bg-background-300 rounded-md cursor-pointer p-2 !border border-background-100 hover:border-primary-600"
+                          onClick={() => {
+                            console.log(
+                              'remix post',
+                              `/api/posts/${selectedPost.remix_of}`
+                            );
+                            fetch(`/api/posts/${selectedPost.remix_of}`).then(
+                              async (res) => {
+                                if (!res.ok) {
+                                  console.error(
+                                    'Failed to fetch remix post:',
+                                    res.statusText
+                                  );
+                                  return;
+                                }
+
+                                const remixPost: Post = fromRaw(
+                                  await res.json()
+                                );
+                                setSelectedPost(remixPost);
+                              }
+                            );
+                          }}
+                        >
+                          <div className="text-text-500 italic text-right pb-2 font-normal group-hover:text-primary-600">
+                            remix
+                          </div>
+                          <div className="bg-slate-50 p-2 rounded-md flex h-auto flex-col select-none w-fit">
+                            <img
+                              src={`/api/images/${selectedPost.image_content}`}
+                              alt={selectedPost.title}
+                              className="shadow-sm mb-2 self-center max-h-[70vh] h-auto"
+                            />
+                            <span className="h-4 bg-slate-50 text-black mb-2">
+                              {selectedPost.title}
+                            </span>
+                          </div>
+                        </span>
+                      ) : (
+                        <span className="mt-0.5">{comment.text_content}</span>
+                      )}
+                      <div className="flex gap-2 text-sm text-text-400 mt-1 ">
+                        <button
+                          className={`text-primary-500 inline ${
+                            selectedPost.action === 'like'
+                              ? 'text-primary-700'
+                              : 'text-primary-500'
+                          }`}
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            upvoteComment(comment.id);
+                          }}
+                        >
+                          {comment.likes || 0}
+                          <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
+                        </button>
+                        <button
+                          className={`text-primary-500 inline ${
+                            selectedPost.action === 'dislike'
+                              ? 'text-primary-700'
+                              : 'text-primary-500'
+                          }`}
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            downvoteComment(comment.id);
+                          }}
+                        >
+                          {comment.dislikes || 0}
+                          <FontAwesomeIcon
+                            icon={faThumbsDown}
+                            className="pl-1"
+                          />
+                        </button>
+                      </div>
                     </span>
                   </div>
-                  <span
-                    className={`text-text-800 text-sm flex ${
-                      comment.remix ? 'flex-col' : 'justify-between'
-                    }`}
-                  >
-                    {comment.remix ? (
-                      <span
-                        className="group text-primary-400 font-medium italic bg-background-200 active:bg-background-300 rounded-md cursor-pointer p-2 !border border-background-100 hover:border-primary-600"
-                        onClick={() => {
-                          // TODO: replace with api call to get post
-                          setSelectedPost({
-                            id: 11,
-                            owner: 4,
-                            poster_display_name: 'bob',
-                            title: "bob's remix haha",
-                            image_content:
-                              'https://picsum.photos/600/400?random=1',
-                            text_content:
-                              'Enjoying the beautiful sights of Paris! remixed!',
-                            location_name: 'Eiffel Tower',
-                            lat: 48.8584,
-                            lng: 2.2945,
-                            posted_time: new Date(2021, 5, 15, 10, 30),
-                            created: new Date(2021, 5, 16, 11, 45),
-                            likes: 9,
-                            dislikes: 1,
-                            num_comments: 0,
-                            remix_of: 7,
-                            remix_of_poster_display_name: 'alice',
-                            remix_of_poster_profile_pic:
-                              'https://picsum.photos/200/200?random=0',
-                            remix_of_title: 'Greetings from Paris',
-                          });
-                        }}
-                      >
-                        <div className="text-text-500 italic text-right pb-2 font-normal group-hover:text-primary-600">
-                          remix
-                        </div>
-                        <div className="bg-slate-50 p-2 rounded-md flex h-auto flex-col select-none w-fit">
-                          <img
-                            src={`${selectedPost.image_content}`}
-                            alt={selectedPost.title}
-                            className="shadow-sm mb-2 self-center max-h-[70vh] h-auto"
-                          />
-                          <span className="h-4 bg-slate-50 text-black mb-2">
-                            {selectedPost.title}
-                          </span>
-                        </div>
-                      </span>
-                    ) : (
-                      <span className="mt-0.5">{comment.text}</span>
-                    )}
-                    <div className="flex gap-2 text-sm text-text-400 mt-1">
-                      <button className="text-primary-500 inline">
-                        {comment.likes || 0}
-                        <FontAwesomeIcon icon={faThumbsUp} className="pl-1" />
-                      </button>
-                      <button className="text-primary-500 inline">
-                        {comment.dislikes || 0}
-                        <FontAwesomeIcon icon={faThumbsDown} className="pl-1" />
-                      </button>
-                    </div>
-                  </span>
                 </div>
-              </div>
-            ))}
-            {selectedPost.comments.length > 0 && (
+              ))}
+            {comments.length > 0 && (
               <div className="text-text-700 text-center italic py-2">
                 you&apos;ve reached the end of the comments section
               </div>
             )}
+            <div className="flex-grow"></div>
+            <hr className="border-t border-gray-300 mx-auto w-1/2" />
+            <div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const commentText = formData.get('comment') as string;
+                  if (commentText) {
+                    const formData = new FormData();
+                    formData.append('textContent', commentText);
+                    formData.append('locationName', selectedPost.location_name);
+                    formData.append('lat', selectedPost.lat.toString());
+                    formData.append('lng', selectedPost.lng.toString());
+                    formData.append('postedTime', new Date().toISOString());
+                    formData.append('title', selectedPost.location_name);
+                    console.log('formData:', formData);
+                    console.log('selectedPost:', selectedPost);
+                    fetch(`/api/posts/${selectedPost.id}/comments`, {
+                      method: 'POST',
+                      body: formData,
+                    }).then(async (res) => {
+                      if (!res.ok) {
+                        console.error(
+                          'Failed to post comment:',
+                          res.statusText
+                        );
+                        return;
+                      }
+
+                      const newComment = fromRaw(await res.json());
+                      setComments([newComment, ...comments]);
+                    });
+                  }
+                  e.currentTarget.reset();
+                }}
+                className="flex gap-2"
+              >
+                <div className="flex w-full border !border-background-300 bg-background-100 focus-within:!border-primary-600 p-1 items-center rounded-full overflow-hidden">
+                  <textarea
+                    name="comment"
+                    placeholder="write a comment..."
+                    className="p-2 w-full resize-none bg-background-100 text-text-800 border-none focus:outline-none no-scrollbar"
+                    rows={1}
+                    maxLength={500}
+                    required
+                  />
+                  <button className="bg-primary-400 hover:bg-primary-500 rounded-full w-6 h-6 mr-2">
+                    <FontAwesomeIcon icon={faComment} />
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>

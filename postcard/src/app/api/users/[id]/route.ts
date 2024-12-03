@@ -72,7 +72,7 @@ export async function PATCH(
   if (!query) {
     return Response.json({ error: 'No fields to update' }, { status: 400 });
   }
-  const userRaw = await pool.query(query.query, query.values);
+  const userRaw = await pool.query(query.query ?? '', query.values);
 
   return Response.json(userRaw.rows[0], {
     status: 200,
@@ -92,6 +92,7 @@ function createPatchQuery(
   }
 
   let values = [id];
+  let isProfilePicMapping = false;
   const valueMappings = Object.entries(data)
     .filter((param) => param[1] !== undefined && param[1] !== null)
     .map(([key, val], idx) => {
@@ -105,18 +106,21 @@ function createPatchQuery(
           break;
         case 'profilePicId':
           column = 'profile_pic';
+          isProfilePicMapping = true;
           break;
       }
       values = values.concat([val]);
       return `${column} = $${idx + 2}::text`;
     })
     .join(', ');
-  
+
   console.log('data', data);
   console.log('valueMappings', valueMappings);
   console.log('values', values);
 
-  const query = `UPDATE users SET ${valueMappings} WHERE id = $1::text RETURNING *`;
+  const query = isProfilePicMapping
+    ? `UPDATE users SET ${valueMappings}, external_profile_pic = false WHERE id = $1::text RETURNING *`
+    : `UPDATE users SET ${valueMappings} WHERE id = $1::text RETURNING *`;
 
   return { query, values };
 }

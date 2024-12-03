@@ -12,6 +12,9 @@ export default function ProfilePicture(props: {
   const isEditable = !!onEdit;
 
   const [isProfileHovered, setIsProfileHovered] = useState(false);
+  const [fileUrl, setFileUrl] = useState<string>(
+    user?.profilePicturePath ?? '/static/default_profile.jpg'
+  );
 
   const handleProfilePictureClick = () => {
     if (isEditable) {
@@ -22,6 +25,7 @@ export default function ProfilePicture(props: {
   const handleProfilePictureChange = (event: ChangeEvent<HTMLInputElement>) => {
     const profilePicture = event.target.files?.[0];
     if (profilePicture && onEdit) {
+      setFileUrl(URL.createObjectURL(profilePicture));
       onEdit({ profilePicture });
     }
   };
@@ -36,7 +40,7 @@ export default function ProfilePicture(props: {
         hidden
       />
       <img
-        src={user?.profilePicturePath ?? '/static/default_profile.jpg'}
+        src={fileUrl}
         alt="profile"
         className={`rounded-full object-cover min-w-64 w-64 min-h-64 h-64 col-start-1 row-start-1 bg-black ${
           isEditable ? 'hover:opacity-50 transition-opacity' : ''

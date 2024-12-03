@@ -14,57 +14,8 @@ import { Dispatch, UIEventHandler, useEffect, useState } from 'react';
 import { useMap } from '@vis.gl/react-google-maps';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { Post } from '@/app/models/post';
+import { downvoted, fromRaw, Post, upvoted } from '@/app/models/post';
 import PostModal from '../PostModal/PostModal';
-
-function upvoted(post: Post): Post {
-  switch (post.local_liked_status) {
-    case 'like':
-      return {
-        ...post,
-        likes: post.likes - 1,
-        local_liked_status: undefined,
-      };
-    case 'dislike':
-      return {
-        ...post,
-        likes: post.likes + 1,
-        dislikes: post.dislikes - 1,
-        local_liked_status: 'like',
-      };
-    default:
-      return {
-        ...post,
-        likes: post.likes + 1,
-        local_liked_status: 'like',
-      };
-  }
-}
-
-function downvoted(post: Post): Post {
-  console.log(post);
-  switch (post.local_liked_status) {
-    case 'like':
-      return {
-        ...post,
-        likes: post.likes - 1,
-        dislikes: post.dislikes + 1,
-        local_liked_status: 'dislike',
-      };
-    case 'dislike':
-      return {
-        ...post,
-        dislikes: post.dislikes - 1,
-        local_liked_status: undefined,
-      };
-    default:
-      return {
-        ...post,
-        dislikes: post.dislikes + 1,
-        local_liked_status: 'dislike',
-      };
-  }
-}
 
 export default function Dashboard(props: {
   postFetchLimits: number;
@@ -136,7 +87,7 @@ export default function Dashboard(props: {
         if (!res.ok) {
           return;
         }
-        const post: Post = await res.json();
+        const post: Post = fromRaw(await res.json());
         handleOpenModal(post);
       });
     }
@@ -293,7 +244,7 @@ export default function Dashboard(props: {
           <div className="flex place-items-center gap-2">
             <button
               className={`inline whitespace-nowrap ${
-                post.local_liked_status === 'like'
+                post.action === 'like'
                   ? 'text-primary-700'
                   : 'text-primary-500'
               }`}
@@ -306,7 +257,7 @@ export default function Dashboard(props: {
             </button>
             <button
               className={`inline whitespace-nowrap ${
-                post.local_liked_status === 'dislike'
+                post.action === 'dislike'
                   ? 'text-primary-700'
                   : 'text-primary-500'
               }`}

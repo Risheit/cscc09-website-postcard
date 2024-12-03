@@ -35,6 +35,7 @@ export default function OAuthSignUp(props: {
           onChange={(ev) =>
             setFormData({ ...formData, username: ev.target.value })
           }
+          maxLength={20}
           required
         />
       </label>
@@ -47,6 +48,7 @@ export default function OAuthSignUp(props: {
           placeholder="Enter a password..."
           ref={passwordRef}
           name="password"
+          maxLength={30}
           onChange={(ev) =>
             setFormData({ ...formData, password: ev.target.value })
           }

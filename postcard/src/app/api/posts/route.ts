@@ -19,19 +19,24 @@ export async function GET(req: NextRequest) {
   const offset = searchParams.get('offset') ?? 0;
 
   const owner = ownerName ? await getUserByUsername(ownerName) : undefined;
-  const ownerCondition = owner ? `AND owner = $6::integer` : '';
+  const ownerCondition = owner ? `AND users.owner = $6::integer` : '';
 
   // Distance search comes from: https://stackoverflow.com/a/49307081/25875922
 
   let query: QueryResult;
   if (!x || !y) {
     query = await pool.query(
-      `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name,
-        users.profile_pic as poster_profile_pic, action
-       FROM posts 
-       JOIN users on owner = users.id
-       LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
-       WHERE comment_of is NULL OR image_content is not NULL
+      `SELECT  ${asReadablePostQuery}, users.display_name as poster_display_name,
+        users.profile_pic as poster_profile_pic, action, parent.title as remix_of_title, parent.id as remix_of,
+        original.display_name as remix_of_poster_display_name, original.profile_pic as remix_of_poster_profile_pic,
+        users.external_profile_pic as poster_external_profile_pic, 
+        original.external_profile_pic as remix_of_poster_external_profile_pic
+      FROM posts
+       JOIN users on posts.owner = users.id
+       LEFT OUTER JOIN posts as parent on parent.id = posts.comment_of
+       LEFT OUTER JOIN users as original on parent.owner = original.id
+       LEFT OUTER JOIN likes on (posts.id, posts.owner) = (post_id, user_id)
+       WHERE posts.comment_of is NULL OR posts.image_content is not NULL
        ${ownerCondition}
        ORDER BY created DESC LIMIT $1::bigint OFFSET $2::bigint
       `,
@@ -39,11 +44,14 @@ export async function GET(req: NextRequest) {
     );
   } else {
     query = await pool.query(
-      `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name, 
-        users.profile_pic as poster_profile_pic, action
-       FROM posts 
-       JOIN users on owner = users.id
-       LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
+      `SELECT  ${asReadablePostQuery}, users.display_name as poster_display_name,
+        users.profile_pic as poster_profile_pic, action, parent.title as remix_of_title, parent.id as remix_of,
+        original.display_name as remix_of_poster_display_name, original.profile_pic as remix_of_poster_profile_pic
+       FROM posts
+       JOIN users on posts.owner = users.id
+       LEFT OUTER JOIN posts as parent on parent.id = posts.comment_of
+       LEFT OUTER JOIN users as original on parent.owner = original.id
+       LEFT OUTER JOIN likes on (posts.id, posts.owner) = (post_id, user_id)
        WHERE ST_DWithin(posts.location, ST_MakePoint($1::decimal,$2::decimal)::geography, $3::decimal)
        AND (comment_of is NULL OR image_content is not NULL) 
        ${ownerCondition}
@@ -76,7 +84,6 @@ export async function POST(req: NextRequest) {
   return Promise.all([sessionPromise, formDataPromise]).then(
     async ([session, formData]) => {
       const dbSession = session as DbSession;
-      
 
       if (!dbSession) {
         return Response.json({ error: 'Unauthorized' }, { status: 405 });

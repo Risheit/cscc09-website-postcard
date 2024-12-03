@@ -35,13 +35,13 @@ export default function Page({ params }: { params: { roomId: string } }) {
       {isLoading && <p className="text-text-500">Loading...</p>}
       {!isLoading && error ? (
         <p className="text-text-500">
-          Oops, the room you are looking for doesn't exist.
+          Oops, the room you are looking for doesn&apos;t exist.
         </p>
       ) : (
         !isLoading && (
           <>
             <p className="text-text-500">
-              You've joined a collaborative room. Help create a postcard by
+              You&apos;ve joined a collaborative room. Help create a postcard by
               drawing on the canvas below.
             </p>
 

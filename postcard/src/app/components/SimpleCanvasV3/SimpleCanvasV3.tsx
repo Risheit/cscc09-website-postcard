@@ -585,7 +585,7 @@ export default function SimpleCanvasV3(props: {
         </span>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <div className="flex flex-col place-items-center w-[500px] border border-background-300 rounded-md overflow-hidden shadow-lg">
           {showCursor && (
             <div
