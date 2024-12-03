@@ -17,14 +17,19 @@ export async function GET(
   const { id } = await params;
 
   const query = await pool.query(
-    `SELECT ${asReadablePostQuery}, users.display_name as poster_display_name,
-        users.profile_pic as poster_profile_pic, action
-       FROM posts 
-       JOIN users on owner = users.id
-       LEFT OUTER JOIN likes on (posts.id, owner) = (post_id, user_id)
-      WHERE comment_of = $1::integer
-      ORDER BY created DESC LIMIT $2::bigint OFFSET $3::bigint`,
-    [id, limit, offset]
+    `SELECT  ${asReadablePostQuery}, users.display_name as poster_display_name,
+        users.profile_pic as poster_profile_pic, action, parent.title as remix_of_title, parent.id as remix_of,
+        original.display_name as remix_of_poster_display_name, original.profile_pic as remix_of_poster_profile_pic,
+        users.external_profile_pic as poster_external_profile_pic, 
+        original.external_profile_pic as remix_of_poster_external_profile_pic
+      FROM posts
+       JOIN users on posts.owner = users.id
+       LEFT OUTER JOIN posts as parent on parent.id = posts.comment_of
+       LEFT OUTER JOIN users as original on parent.owner = original.id
+       LEFT OUTER JOIN likes on (posts.id, posts.owner) = (post_id, user_id)
+       WHERE posts.comment_of = $1::integer
+       ORDER BY created DESC`,
+    [id]
   );
 
   return Response.json(query.rows, {

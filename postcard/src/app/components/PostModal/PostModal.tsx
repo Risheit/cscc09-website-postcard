@@ -95,7 +95,7 @@ export default function PostModal(props: {
       const comments = await res.json();
       setComments(comments.map(fromRaw));
     });
-  }, []);
+  }, [comments, selectedPost]);
 
   return isPostOpen && selectedPost ? (
     <Modal show={isPostOpen} onHide={handleCloseModal} centered>
