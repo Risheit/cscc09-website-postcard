@@ -32,7 +32,6 @@ export type Post = {
 };
 
 export function fromRaw(postRaw: Post) {
-  console.log('postRaw', postRaw);
   const internalProfilePicPath = postRaw.poster_profile_pic
     ? `/api/images/${postRaw.poster_profile_pic}`
     : undefined;
@@ -50,7 +49,6 @@ export function fromRaw(postRaw: Post) {
       ? postRaw.remix_of_poster_profile_pic
       : internalRemixOfProfilePicPath;
   
-  console.log('new post', postRaw);
   return postRaw;
 }
 
@@ -79,7 +77,6 @@ export function upvoted(post: Post): Post {
 }
 
 export function downvoted(post: Post): Post {
-  console.log(post);
   switch (post.action) {
     case 'like':
       return {

@@ -81,7 +81,6 @@ export const config = {
     signIn: async ({ user, account }) => {
       if (account?.provider === 'github') {
         const connectedAccount = await getOAuthAccountByUsername(user.id);
-        console.log('connectedAccount', connectedAccount);
         if (!connectedAccount) {
           const encodedName = encodeURIComponent(user.name ?? '');
           const redirectUrl = `/account/create?provider=github&name=${encodedName}&user=${user.id}`;

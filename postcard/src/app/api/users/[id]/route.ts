@@ -114,10 +114,6 @@ function createPatchQuery(
     })
     .join(', ');
 
-  console.log('data', data);
-  console.log('valueMappings', valueMappings);
-  console.log('values', values);
-
   const query = isProfilePicMapping
     ? `UPDATE users SET ${valueMappings}, external_profile_pic = false WHERE id = $1::text RETURNING *`
     : `UPDATE users SET ${valueMappings} WHERE id = $1::text RETURNING *`;

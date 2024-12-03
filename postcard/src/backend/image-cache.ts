@@ -3,7 +3,6 @@ export default abstract class ImageCache {
     private static cache: Array<{ id: string, file: File }> = [];
     
     static query(id: string) {
-        this.cache.forEach((file) => console.log(file));
         return this.cache.find((file) => file.id === id)?.file;
     }
 

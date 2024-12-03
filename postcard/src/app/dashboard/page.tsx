@@ -26,9 +26,7 @@ export default function Page() {
   useEffect(() => {
     fetch(`/api/posts?limit=${fetchLimit}`).then(async (res) => {
       const p = await res.json();
-      console.log('gotten', p);
       const setupPosts = p.map(fromRaw);
-      console.log('setup', setupPosts);
       setPosts(setupPosts);
     });
   }, []);

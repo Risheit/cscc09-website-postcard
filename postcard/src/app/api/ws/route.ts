@@ -23,8 +23,6 @@ export function SOCKET(client: import('ws').WebSocket) {
   client.on('message', (data) => {
     const dataParsed = JSON.parse(data.toString());
 
-    console.log(dataParsed);
-
     if (dataParsed.action === 'ping') {
       send({
         username: 'Server',
@@ -47,15 +45,9 @@ export function SOCKET(client: import('ws').WebSocket) {
     } else if (dataParsed.action === 'leave') {
       clients = clients.filter((c) => c.client !== client);
 
-      // console.log('clients: ', clients.length);
-
       // delete room if no clients in 10 seconds
       setTimeout(() => {
         if (clients.length === 0) {
-          // console.log(
-          //   '=========[leave] deleting room and image...=========='
-          // );
-
           delete strokes[roomId];
 
           getImageConnectedToRoom(roomId).then((imageId) => {
@@ -87,10 +79,6 @@ export function SOCKET(client: import('ws').WebSocket) {
       }
     } else if (dataParsed.action === 'close') {
       if (roomId) {
-        // console.log(
-        //   '=========[close] deleting room and image...=========='
-        // );
-
         delete strokes[roomId];
 
         getImageConnectedToRoom(roomId).then((imageId) => {
@@ -125,10 +113,6 @@ export function SOCKET(client: import('ws').WebSocket) {
         delete strokes[roomId];
         getImageConnectedToRoom(roomId).then((imageId) => {
           if (imageId) {
-            // console.log(
-            //   '=========[disconnect] deleting room and image...=========='
-            // );
-
             deleteRoom(roomId);
             deleteImage(imageId.imageId);
 
@@ -159,7 +143,6 @@ function createHelpers(client: import('ws').WebSocket) {
         // count++;
       }
     }
-    // console.log('total recipients: ', count);
   };
   return { send, broadcast };
 }

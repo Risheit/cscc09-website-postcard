@@ -111,7 +111,6 @@ const CreatePostPage: FC = () => {
       setIsImagePost(true);
       setSecondStep(true);
 
-      console.log('remixed post', post);
       const imageRes = await fetch(`/api/images/${post.image_content}`);
       const imageBlob = await imageRes.blob();
       setFile(new File([imageBlob], 'remix.png'));
@@ -127,19 +126,11 @@ const CreatePostPage: FC = () => {
     });
   }, []);
 
-  useEffect(() => {
-    console.log('state', canvasState);
-    console.log('data', data);
-  }, [canvasState, data]);
-
   const submitPost = async () => {
     if (!remixedPost && isRemix) {
       console.error('Remix post not found. Cannot submit this post.');
       return;
     }
-
-    console.log('submitting post...');
-    console.log(data);
 
     const formData = new FormData();
     if (data.textContent) {
@@ -156,19 +147,30 @@ const CreatePostPage: FC = () => {
     formData.append('postedTime', data.postedTime);
     formData.append('title', data.title);
 
-    console.log('Data to be sent: ', formData);
-    const res = await fetch(`/api/posts/${remixedPost!.id}/comments`, {
-      method: 'POST',
-      body: formData,
-    });
-    if (!res.ok) {
-      console.error('Failed to submit post: ', res);
-      router.push(`/dashboard`);
-      return;
+    let res: Response;
+    if (remixedPost) {
+      res = await fetch(`/api/posts/${remixedPost?.id}/comments`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        console.error('Failed to submit post: ', res);
+        router.push(`/dashboard`);
+        return;
+      }
+    } else {
+      res = await fetch(`/api/posts`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        console.error('Failed to submit post: ', res);
+        router.push(`/dashboard`);
+        return;
+      }
     }
 
     const post: Post = await res.json();
-    console.log('Post submitted: ', post);
     router.push(`/dashboard?post=${post.id}`);
     setIsSubmitted(true);
     router.push('/dashboard');

@@ -86,7 +86,6 @@ export default function PostModal(props: {
   useEffect(() => {
     if (!selectedPost) return;
 
-    console.log(`/api/posts/${selectedPost.id}/comments`);
     fetch(`/api/posts/${selectedPost.id}/comments`).then(async (res) => {
       if (!res.ok) {
         console.error('Failed to fetch comments:', res.statusText);
@@ -94,10 +93,9 @@ export default function PostModal(props: {
       }
 
       const comments = await res.json();
-      console.log('comments:', comments);
       setComments(comments.map(fromRaw));
     });
-  }, [selectedPost, comments]);
+  }, []);
 
   return isPostOpen && selectedPost ? (
     <Modal show={isPostOpen} onHide={handleCloseModal} centered>
@@ -364,10 +362,6 @@ export default function PostModal(props: {
                         <span
                           className="group text-primary-400 font-medium italic bg-background-200 active:bg-background-300 rounded-md cursor-pointer p-2 !border border-background-100 hover:border-primary-600"
                           onClick={() => {
-                            console.log(
-                              'remix post',
-                              `/api/posts/${selectedPost.remix_of}`
-                            );
                             fetch(`/api/posts/${selectedPost.remix_of}`).then(
                               async (res) => {
                                 if (!res.ok) {
@@ -461,8 +455,6 @@ export default function PostModal(props: {
                     formData.append('lng', selectedPost.lng.toString());
                     formData.append('postedTime', new Date().toISOString());
                     formData.append('title', selectedPost.location_name);
-                    console.log('formData:', formData);
-                    console.log('selectedPost:', selectedPost);
                     fetch(`/api/posts/${selectedPost.id}/comments`, {
                       method: 'POST',
                       body: formData,
