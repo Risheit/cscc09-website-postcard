@@ -81,7 +81,6 @@ export default function SimpleCanvasV3(props: {
 
   useEffect(() => {
     if (!submitted) return;
-    // console.log('submitted', submitted);
     wsSend(roomId, 'close');
   }, [submitted]);
 

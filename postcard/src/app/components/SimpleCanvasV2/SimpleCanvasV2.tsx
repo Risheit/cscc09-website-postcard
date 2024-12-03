@@ -175,8 +175,6 @@ export default function SimpleCanvasV2(props: {
     );
     if (!canvas) return;
 
-    console.log('found canvas');
-
     // create new canvas, fill with white, draw old canvas on top
     const newCanvas = document.createElement('canvas');
     newCanvas.width = canvasSize.width;

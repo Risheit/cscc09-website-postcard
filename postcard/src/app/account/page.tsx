@@ -15,7 +15,6 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('session', session);
     if (!session || session.status === 'unauthenticated') {
       router.push('/api/auth/signin');
     }
@@ -53,7 +52,6 @@ export default function Page() {
     })
       .then(async (res) => {
         const u = await res.json();
-        console.log('updated user', u);
         const updatedUser = {
           aboutMe: u.about_me,
           displayName: u.display_name,

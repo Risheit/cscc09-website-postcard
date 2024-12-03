@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Dispatch, useEffect } from 'react';
+import { Dispatch } from 'react';
 
 export default function CreatePostForm(props: {
   formData: {
@@ -16,10 +16,6 @@ export default function CreatePostForm(props: {
   }>;
 }) {
   const { formData, setFormData } = props;
-
-  useEffect(() => {
-    console.log(dayjs().format());
-  });
 
   return (
     <div id="create-post-form" className="grid grid-cols-1 gap-4 mb-4">

@@ -127,7 +127,6 @@ export async function POST(req: NextRequest) {
           lng,
           lat,
           userId,
-          null,
           postedTime,
         ]
       );

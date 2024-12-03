@@ -43,7 +43,6 @@ export async function uploadNewImage(image: UploadedFile) {
 export async function collectImage(id: string) {
   const cacheResult = ImageCache.query(id);
   if (cacheResult) {
-    console.log('pulling from cache...', cacheResult);
     return cacheResult;
   }
 
