@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="h-12 flex place-items-center justify-center bg-text-100 border-t border-background-300 px-2 py-12">
+    <footer className="h-12 flex place-items-center justify-center bg-text-100 border-t !border-background-300 px-2 py-12">
       made by
       <a
         href="https://github.com/gcheang"

@@ -1,8 +1,8 @@
-import { Dispatch, useEffect, useRef, useState } from "react";
-import { Stage, Layer, Line } from "react-konva";
-import "./SimpleCanvasV2.css";
+import { Dispatch, useEffect, useRef, useState } from 'react';
+import { Stage, Layer, Line } from 'react-konva';
+import './SimpleCanvasV2.css';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCancel,
   faPencil,
@@ -14,10 +14,10 @@ import {
   faRedo,
   faUpload,
   faSave,
-} from "@fortawesome/free-solid-svg-icons";
-import { KonvaEventObject, Node, NodeConfig } from "konva/lib/Node";
+} from '@fortawesome/free-solid-svg-icons';
+import { KonvaEventObject, Node, NodeConfig } from 'konva/lib/Node';
 
-type Tool = "brush" | "eraser";
+type Tool = 'brush' | 'eraser';
 type Line = { tool: Tool; size: number; colour: Colour; points: number[] };
 type Colour = string; // hex, e.g. "#000000"
 
@@ -26,19 +26,19 @@ export default function SimpleCanvasV2(props: {
   setFile: Dispatch<File | null>;
 }) {
   const { file, setFile } = props;
-  const [tool, setTool] = useState<Tool>("brush");
+  const [tool, setTool] = useState<Tool>('brush');
   const [lines, setLines] = useState<Line[]>([]);
   const [undoLines, setUndoLines] = useState<Line[]>([]); // manages lines for redo
   const isDrawing = useRef(false);
   const [currentColour, setCurrentColour] = useState<Colour[]>([
-    "#ffffff",
-    "#dc2626",
-    "#16a34a",
-    "#2563eb",
+    '#ffffff',
+    '#dc2626',
+    '#16a34a',
+    '#2563eb',
   ]);
   const [canvasSize, setCanvasSize] = useState({ width: 500, height: 500 });
 
-  const [colorPicker, setColorPicker] = useState("#ffffff");
+  const [colorPicker, setColorPicker] = useState('#ffffff');
   const [colorPickerUsed, setColorPickerUsed] = useState(false);
   const [strokeWidth, setStrokeWidth] = useState(5);
 
@@ -114,7 +114,7 @@ export default function SimpleCanvasV2(props: {
       setMousePos({ x: e.clientX, y: e.clientY });
 
       const canvas: HTMLCanvasElement | null = document.querySelector(
-        "#canvas-stage > div > canvas"
+        '#canvas-stage > div > canvas'
       );
 
       if (!canvas) return;
@@ -131,10 +131,10 @@ export default function SimpleCanvasV2(props: {
         e.clientY < canvasPos.current.top + canvasSize.height
       ) {
         setShowCursor(true);
-        canvas.style.cursor = "none";
+        canvas.style.cursor = 'none';
       } else {
         setShowCursor(false);
-        canvas.style.cursor = "default";
+        canvas.style.cursor = 'default';
       }
     };
 
@@ -153,12 +153,12 @@ export default function SimpleCanvasV2(props: {
     // reset upload input
     const upload = fileUploadRef.current;
     if (!upload) return;
-    upload.value = "";
+    upload.value = '';
 
     // remove background image
-    const bg = document.querySelector(".konvajs-content") as HTMLDivElement;
+    const bg = document.querySelector('.konvajs-content') as HTMLDivElement;
     if (!bg) return;
-    bg.style.backgroundImage = "";
+    bg.style.backgroundImage = '';
   };
 
   // if file is changed to null, reset canvas
@@ -171,17 +171,17 @@ export default function SimpleCanvasV2(props: {
   // save canvas
   const saveCanvas = () => {
     const canvas: HTMLCanvasElement | null = document.querySelector(
-      "#canvas-stage > div > canvas"
+      '#canvas-stage > div > canvas'
     );
     if (!canvas) return;
 
-    console.log("found canvas");
+    console.log('found canvas');
 
     // create new canvas, fill with white, draw old canvas on top
-    const newCanvas = document.createElement("canvas");
+    const newCanvas = document.createElement('canvas');
     newCanvas.width = canvasSize.width;
     newCanvas.height = canvasSize.height;
-    const newCtx = newCanvas.getContext("2d");
+    const newCtx = newCanvas.getContext('2d');
     if (!newCtx) return;
 
     const drawOldCanvas = () => {
@@ -190,9 +190,9 @@ export default function SimpleCanvasV2(props: {
       oldCanvas.onload = () => {
         newCtx.drawImage(oldCanvas, 0, 0, canvasSize.width, canvasSize.height);
 
-        const link = document.createElement("a");
+        const link = document.createElement('a');
         link.href = newCanvas.toDataURL();
-        link.download = "canvas.png";
+        link.download = 'canvas.png';
         link.click();
       };
     };
@@ -205,23 +205,23 @@ export default function SimpleCanvasV2(props: {
         drawOldCanvas();
       };
     } else {
-      newCtx.fillStyle = "#000000";
+      newCtx.fillStyle = '#000000';
       newCtx.fillRect(0, 0, canvasSize.width, canvasSize.height);
       drawOldCanvas();
     }
   };
 
   return (
-    <div className="flex flex-col place-items-center w-[500px] border border-background-300 rounded-md overflow-hidden shadow-lg">
+    <div className="flex flex-col place-items-center w-[500px] border !border-background-300 rounded-md overflow-hidden shadow-lg">
       {showCursor && (
         <div
           id="circularcursor"
           style={{
-            left: mousePos.x + window.scrollX - strokeWidth / 2 + "px",
-            top: mousePos.y + window.scrollY - strokeWidth / 2 + "px",
+            left: mousePos.x + window.scrollX - strokeWidth / 2 + 'px',
+            top: mousePos.y + window.scrollY - strokeWidth / 2 + 'px',
             width: strokeWidth,
             height: strokeWidth,
-            mixBlendMode: "difference",
+            mixBlendMode: 'difference',
           }}
         ></div>
       )}
@@ -248,7 +248,7 @@ export default function SimpleCanvasV2(props: {
             const MAX_SIZE = 500;
 
             if (img.width > img.height) {
-              console.log("new canvas size", {
+              console.log('new canvas size', {
                 width: MAX_SIZE,
                 height: (MAX_SIZE / img.width) * img.height,
               });
@@ -257,7 +257,7 @@ export default function SimpleCanvasV2(props: {
                 height: (MAX_SIZE / img.width) * img.height,
               });
             } else {
-              console.log("new canvas size", {
+              console.log('new canvas size', {
                 width: (MAX_SIZE / img.height) * img.width,
                 height: MAX_SIZE,
               });
@@ -268,7 +268,7 @@ export default function SimpleCanvasV2(props: {
             }
 
             const bg = document.querySelector(
-              ".konvajs-content"
+              '.konvajs-content'
             ) as HTMLDivElement;
             if (!bg) return;
             bg.style.backgroundImage = `url(${img.src})`;
@@ -285,14 +285,14 @@ export default function SimpleCanvasV2(props: {
           <FontAwesomeIcon icon={faCancel} />
         </button>
         <button
-          className={tool === "brush" ? "bg-background-300 text-text-900" : ""}
-          onClick={() => setTool("brush")}
+          className={tool === 'brush' ? 'bg-background-300 text-text-900' : ''}
+          onClick={() => setTool('brush')}
         >
           <FontAwesomeIcon icon={faPencil} />
         </button>
         <button
-          className={tool === "eraser" ? "bg-background-300 text-text-900" : ""}
-          onClick={() => setTool("eraser")}
+          className={tool === 'eraser' ? 'bg-background-300 text-text-900' : ''}
+          onClick={() => setTool('eraser')}
         >
           <FontAwesomeIcon icon={faEraser} />
         </button>
@@ -300,7 +300,7 @@ export default function SimpleCanvasV2(props: {
         <div className="w-5"></div>
 
         <button
-          className={`border-white !border disabled:border-white rounded-full p-0 min-w-0 w-[20px] min-h-0 h-[20px]`}
+          className={`!border-white !border disabled:!border-white rounded-full p-0 min-w-0 w-[20px] min-h-0 h-[20px]`}
           disabled={true}
           style={{ backgroundColor: currentColour[0] }}
         ></button>
@@ -325,7 +325,7 @@ export default function SimpleCanvasV2(props: {
           <button
             key={i}
             className={`border-white border-2 rounded-full p-0 min-w-0 w-[15px] min-h-0 h-[15px] ${
-              currentColour[0] === colour ? "border-2" : ""
+              currentColour[0] === colour ? 'border-2' : ''
             }`}
             onClick={() =>
               setCurrentColour([
@@ -414,7 +414,7 @@ export default function SimpleCanvasV2(props: {
                 lineCap="round"
                 lineJoin="round"
                 globalCompositeOperation={
-                  line.tool === "brush" ? "source-over" : "destination-out"
+                  line.tool === 'brush' ? 'source-over' : 'destination-out'
                 }
               />
             ))}

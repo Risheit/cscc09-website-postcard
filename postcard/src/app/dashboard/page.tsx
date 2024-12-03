@@ -1,18 +1,20 @@
-"use client";
-import { useState, useEffect } from "react";
-import "./styles.css";
+'use client';
+import { useState, useEffect } from 'react';
+import './styles.css';
 
 import {
   APIProvider,
   Map,
   MapCameraChangedEvent,
-} from "@vis.gl/react-google-maps";
+} from '@vis.gl/react-google-maps';
 
-import { PoiMarkers } from "./markers";
-import Dashboard from "../components/Dashboard/Dashboard";
-import LocateMe from "../components/Dashboard/LocateMe/LocateMe";
+import { PoiMarkers } from './markers';
+import Dashboard from '../components/Dashboard/Dashboard';
+import LocateMe from '../components/Dashboard/LocateMe/LocateMe';
 
-import { Post } from "../models/post";
+import { fromRaw, Post } from '../models/post';
+
+const fetchLimit = 15;
 
 export default function Page() {
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -22,13 +24,16 @@ export default function Page() {
   const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
-    fetch("/api/posts").then(async (res) => {
+    fetch(`/api/posts?limit=${fetchLimit}`).then(async (res) => {
       const p = await res.json();
-      setPosts(p);
+      console.log('gotten', p);
+      const setupPosts = p.map(fromRaw);
+      console.log('setup', setupPosts);
+      setPosts(setupPosts);
     });
   }, []);
 
-  const DASHBOARD_MAP_ID = "postcard-map";
+  const DASHBOARD_MAP_ID = 'postcard-map';
 
   useEffect(() => {
     const resizeMap = () => {
@@ -37,46 +42,46 @@ export default function Page() {
         height: window.innerHeight - 48, // subtract header height
       });
     };
-    window.addEventListener("resize", resizeMap);
+    window.addEventListener('resize', resizeMap);
     resizeMap();
 
     // load default camera location
-    if (localStorage.getItem("defaultCamera")) {
+    if (localStorage.getItem('defaultCamera')) {
       setCameraLocation(
         JSON.parse(
-          localStorage.getItem("defaultCamera") ?? '{"lat" : 0, "lng" : 0}'
+          localStorage.getItem('defaultCamera') ?? '{"lat" : 0, "lng" : 0}'
         )
       );
     }
 
-    return () => window.removeEventListener("resize", resizeMap);
+    return () => window.removeEventListener('resize', resizeMap);
   }, []);
 
   return (
     <>
       <APIProvider
-        apiKey={process.env.NEXT_PUBLIC_GMP_API_KEY ?? ""}
-        onLoad={() => console.log("Maps API has loaded.")}
+        apiKey={process.env.NEXT_PUBLIC_GMP_API_KEY ?? ''}
+        onLoad={() => console.log('Maps API has loaded.')}
       >
         <div
           className="relative inline-block"
           style={{
             width: mapSize.width,
             height: mapSize.height,
-            color: "initial", // resets text color
+            color: 'initial', // resets text color
           }}
         >
           <Map
-            style={{ visibility: mapLoaded ? "visible" : "hidden" }}
+            style={{ visibility: mapLoaded ? 'visible' : 'hidden' }}
             id={DASHBOARD_MAP_ID}
             defaultZoom={
               cameraLocation.lat === 0 && cameraLocation.lng === 0 ? 2 : 5
             }
             defaultCenter={{ lat: cameraLocation.lat, lng: cameraLocation.lng }}
-            mapId={process.env.NEXT_PUBLIC_GMP_MAP_ID ?? ""}
+            mapId={process.env.NEXT_PUBLIC_GMP_MAP_ID ?? ''}
             onCameraChanged={(ev: MapCameraChangedEvent) => {
               localStorage.setItem(
-                "defaultCamera",
+                'defaultCamera',
                 JSON.stringify(ev.detail.center)
               );
               // TODO: maybe update posts based on map bounds
@@ -86,7 +91,7 @@ export default function Page() {
             disableDefaultUI={true}
             disableDoubleClickZoom={true}
             scrollwheel={true}
-            colorScheme={"FOLLOW_SYSTEM"}
+            colorScheme={'FOLLOW_SYSTEM'}
             onTilesLoaded={() => {
               setMapLoaded(true);
             }}
@@ -94,7 +99,12 @@ export default function Page() {
             <PoiMarkers mapId={DASHBOARD_MAP_ID} posts={posts} />
           </Map>
         </div>
-        <Dashboard posts={posts} setPosts={setPosts} mapId={DASHBOARD_MAP_ID} />
+        <Dashboard
+          postFetchLimits={fetchLimit}
+          posts={posts}
+          setPosts={setPosts}
+          mapId={DASHBOARD_MAP_ID}
+        />
         <LocateMe mapId={DASHBOARD_MAP_ID} />
       </APIProvider>
     </>

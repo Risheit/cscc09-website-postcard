@@ -1,6 +1,11 @@
-import Link from "next/link";
+'use client';
+
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
+  const router = useRouter();
+
   return (
     <div className="bg-background-100 flex w-full py-10">
       <div className="container mx-auto flex flex-col items-center justify-center">
@@ -17,8 +22,13 @@ export default function Page() {
             /dashboard
           </Link>
         </p>
-        {/* TODO: add signup link */}
-        <button className="mt-6 px-4 py-2 bg-primary-500 text-background-900 rounded hover:bg-primary-400">
+        <button
+          className="mt-6 px-4 py-2 bg-primary-500 text-background-900 rounded hover:bg-primary-400"
+          onClick={(ev) => {
+            ev.preventDefault();
+            router.push('/account/create?redirect=/dashboard');
+          }}
+        >
           Get Started
         </button>
       </div>

@@ -1,56 +1,50 @@
-import { signIn } from 'next-auth/react';
-import { useRef } from 'react';
+'use client';
 
-type OAuthSignUpProps = {
-  defaultDisplayName: string;
-  userId: number;
-  redirectUrl: string;
-};
+import { Dispatch, useEffect, useRef } from 'react';
 
-export default function OAuthSignUp({
-  defaultDisplayName,
-  userId,
-  redirectUrl,
-}: OAuthSignUpProps) {
-  const nameRef = useRef<HTMLInputElement>(null);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!nameRef.current) {
-      return;
-    }
-
-    const name = nameRef.current.value;
-    fetch('/api/auth/oauth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username: userId, displayName: name }),
-    }).then(() => {
-      signIn("github", { callbackUrl: redirectUrl });
-    });
+export default function OAuthSignUp(props: {
+  defaultName: string;
+  formData: {
+    name: string;
   };
+  setFormData: Dispatch<{
+    name: string;
+  }>;
+  setFormInvalid: Dispatch<boolean>;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const {
+    defaultName,
+    formData,
+    setFormData,
+    setFormInvalid: setFormInvalid,
+  } = props;
+
+  useEffect(() => {
+    if (!inputRef.current?.value) {
+      setFormInvalid(true);
+    }
+  }, [setFormInvalid]);
 
   return (
-    <div>
-      <h1>OAuthSignUp</h1>
-      <form onSubmit={handleSubmit}>
-        <h2>Enter in a user name</h2>
+    <div id="oauth-sign-up-form" className="grid grid-cols-1 gap-4 mb-4">
+      <label className="flex flex-col">
+        <span className="font-semibold mb-1">Username:</span>
         <input
           type="text"
-          className="form-element"
-          placeholder="Enter your name"
-          defaultValue={defaultDisplayName}
-          name="username"
-          ref={nameRef}
+          className="p-2 bg-background-50 border !border-text-500 rounded"
+          placeholder="Enter a username..."
+          defaultValue={defaultName}
+          name="displayName"
+          ref={inputRef}
+          onChange={(ev) => {
+            setFormData({ ...formData, name: ev.target.value });
+            setFormInvalid(!ev.target.value);
+          }}
+          maxLength={30}
           required
         />
-        <button type="submit" className="form-element">
-          Sign Up
-        </button>
-      </form>
+      </label>
     </div>
   );
 }

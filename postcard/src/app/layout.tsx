@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 
 import { Lexend } from "next/font/google";
@@ -24,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="no-scrollbar">
       <body className={lexend.className}>
         <div className="min-h-[100vh] flex flex-col">
           <NextAuthProvider>

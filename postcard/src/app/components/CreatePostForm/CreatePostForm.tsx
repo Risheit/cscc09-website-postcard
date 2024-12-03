@@ -1,4 +1,5 @@
-import { Dispatch } from "react";
+import dayjs from 'dayjs';
+import { Dispatch, useEffect } from 'react';
 
 export default function CreatePostForm(props: {
   formData: {
@@ -16,41 +17,48 @@ export default function CreatePostForm(props: {
 }) {
   const { formData, setFormData } = props;
 
+  useEffect(() => {
+    console.log(dayjs().format());
+  });
+
   return (
     <div id="create-post-form" className="grid grid-cols-1 gap-4 mb-4">
       <label className="flex flex-col">
         <span className="font-semibold mb-1">Location:</span>
         <input
-          className="p-2 bg-background-50 border border-text-500 rounded"
+          className="p-2 bg-background-50 border !border-text-500 rounded"
           placeholder="Enter location..."
-          value={formData.locationName || ""}
+          value={formData.locationName || ''}
           onChange={(ev) => {
             setFormData({ ...formData, locationName: ev.target.value });
           }}
+          maxLength={50}
         />
       </label>
 
       <label className="flex flex-col">
         <span className="font-semibold mb-1">Title:</span>
         <input
-          className="p-2 bg-background-50 border border-text-500 rounded"
+          className="p-2 bg-background-50 border !border-text-500 rounded"
           placeholder="Enter title..."
-          value={formData.title || ""}
+          value={formData.title || ''}
           onChange={(ev) => {
             setFormData({ ...formData, title: ev.target.value });
           }}
+          maxLength={50}
         />
       </label>
 
       <label className="flex flex-col">
         <span className="font-semibold mb-1">Text:</span>
         <textarea
-          className="p-2 bg-background-50 border border-text-500 rounded"
+          className="p-2 bg-background-50 border !border-text-500 rounded"
           placeholder="Enter text..."
-          value={formData.textContent || ""}
+          value={formData.textContent || ''}
           onChange={(ev) => {
             setFormData({ ...formData, textContent: ev.target.value });
           }}
+          maxLength={2000}
         />
       </label>
 
@@ -58,9 +66,11 @@ export default function CreatePostForm(props: {
         <span className="font-semibold mb-1">Date and Time:</span>
         <input
           type="datetime-local"
-          className="p-2 bg-background-50 border border-text-500 rounded"
+          className="p-2 bg-background-50 border !border-text-500 rounded"
           onFocus={(ev) => ev.target.showPicker()}
-          value={formData.postedTime || ""}
+          defaultValue={
+            formData.postedTime || dayjs().format('YYYY-MM-DDTHH:mm')
+          }
           onChange={(ev) => {
             setFormData({ ...formData, postedTime: ev.target.value });
           }}
