@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Dispatch, useEffect, useRef } from "react";
+import { Dispatch, useEffect, useRef } from 'react';
 
 export default function OAuthSignUp(props: {
   formData: {
@@ -28,7 +28,7 @@ export default function OAuthSignUp(props: {
         <span className="font-semibold mb-1">Username:</span>
         <input
           type="text"
-          className="p-2 bg-background-50 border border-text-500 rounded"
+          className="p-2 bg-background-50 border !border-text-500 rounded"
           placeholder="Enter a username..."
           ref={usernameRef}
           name="username"
@@ -44,7 +44,7 @@ export default function OAuthSignUp(props: {
         <span className="font-semibold mb-1">Password:</span>
         <input
           type="password"
-          className="p-2 bg-background-50 border border-text-500 rounded"
+          className="p-2 bg-background-50 border !border-text-500 rounded"
           placeholder="Enter a password..."
           ref={passwordRef}
           name="password"

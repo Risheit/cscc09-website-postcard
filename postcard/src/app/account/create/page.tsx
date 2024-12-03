@@ -41,7 +41,6 @@ export default function Page({
   const defaultDisplayName =
     searchParams?.name?.replace(testWhitespace, '') ?? '';
   const redirectUrl = searchParams?.redirect ?? '/';
-  const returnUrl = searchParams?.return ?? '/api/auth/signin';
   const signUpMessage = isOAuth ? 'complete sign up' : 'create account';
   const error = searchParams?.error;
 
@@ -150,7 +149,7 @@ export default function Page({
       </p>
 
       {error && (
-        <div className="p-4 bg-red-700 border border-red-700 rounded">
+        <div className="p-4 bg-red-700 border !border-red-700 rounded">
           {getErrorMessage(error)}
         </div>
       )}
@@ -172,20 +171,25 @@ export default function Page({
         />
       )}
 
-      <div className="grid grid-cols-2 gap-2 mb-12">
+      <div className="grid gap-2 mb-12">
         <button
-          className="p-2 bg-background-200 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
-          onClick={() => router.push(returnUrl)}
-        >
-          back
-        </button>
-        <button
-          className="p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
+          className="p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:!border-background-300 disabled:border"
           disabled={isRequesting || isFormInvalid}
           onClick={() => handleSubmit()}
         >
           {isRequesting ? 'signing up...' : signUpMessage}
         </button>
+        {!isOAuth && (
+          <span
+            className="text-primary-600 text-sm text-center italic underline cursor-pointer mt-4"
+            onClick={() => {
+              router.push('/api/auth/signin');
+            }}
+          >
+            {' '}
+            Already have an account?
+          </span>
+        )}
       </div>
     </div>
   );

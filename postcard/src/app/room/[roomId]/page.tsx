@@ -45,7 +45,7 @@ export default function Page({ params }: { params: { roomId: string } }) {
               drawing on the canvas below.
             </p>
 
-            <div className="block w-full place-items-center">
+            <div className="flex flex-col w-full place-items-center">
               <RoomCanvas file={file} roomId={params.roomId} />
             </div>
           </>

@@ -585,8 +585,8 @@ export default function SimpleCanvasV3(props: {
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col place-items-center w-[500px] border border-background-300 rounded-md overflow-hidden shadow-lg">
+      <div className="flex gap-2">
+        <div className="flex flex-col place-items-center w-[500px] border !border-background-300 rounded-md overflow-hidden shadow-lg">
           {showCursor && (
             <div
               id="circularcursor"
@@ -643,7 +643,7 @@ export default function SimpleCanvasV3(props: {
             <div className="w-5"></div>
 
             <button
-              className={`border-white !border disabled:border-white rounded-full p-0 min-w-0 w-[20px] min-h-0 h-[20px]`}
+              className={`!border-white !border disabled:!border-white rounded-full p-0 min-w-0 w-[20px] min-h-0 h-[20px]`}
               disabled={true}
               style={{ backgroundColor: currentColour[0] }}
             ></button>

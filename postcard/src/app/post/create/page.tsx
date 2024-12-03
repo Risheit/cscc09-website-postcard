@@ -171,7 +171,7 @@ export default function Page() {
           <img
             src="/static/loading.svg"
             alt="loading..."
-            className="w-20 h-20 mt-20 opacity-50"
+            className="w-20 h-20 mt-20 opacity-50 select-none"
           />
         </div>
       )}
@@ -192,8 +192,8 @@ export default function Page() {
           <button
             className="flex items-center p-4 bg-background-100 rounded-lg shadow-lg border-2 hover:border-2 text-left"
             style={{
-              color: isImagePost ? 'var(--text-900)' : 'var(--text-700)',
-              borderColor: isImagePost ? 'var(--text-900)' : 'transparent',
+              color: isImagePost ? 'var(--text-800)' : 'var(--text-700)',
+              borderColor: isImagePost ? 'var(--text-800)' : 'transparent',
             }}
             onClick={() => setIsImagePost(true)}
           >
@@ -208,8 +208,8 @@ export default function Page() {
           <button
             className="flex items-center p-4 bg-background-100 rounded-lg shadow-lg border-2 hover:border-2"
             style={{
-              color: !isImagePost ? 'var(--text-900)' : 'var(--text-700)',
-              borderColor: !isImagePost ? 'var(--text-900)' : 'transparent',
+              color: !isImagePost ? 'var(--text-800)' : 'var(--text-700)',
+              borderColor: !isImagePost ? 'var(--text-800)' : 'transparent',
             }}
             onClick={() => setIsImagePost(false)}
           >
@@ -293,7 +293,7 @@ export default function Page() {
           style={{ display: secondStep ? 'none' : 'block' }}
         >
           <span className="font-semibold">Coordinates:</span>{' '}
-          <span className="bg-background-200 border border-text-500 rounded px-2 ml-1">
+          <span className="bg-background-200 border !border-text-500 rounded px-2 ml-1">
             {poi.location.lat.toFixed(5)}° {poi.location.lat > 0 ? 'N' : 'S'},{' '}
             {poi.location.lng.toFixed(5)}° {poi.location.lng > 0 ? 'W' : 'E'}
           </span>
@@ -302,7 +302,7 @@ export default function Page() {
 
       {isLoaded && (
         <button
-          className="mt-4 p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:border-background-300 disabled:border"
+          className="mt-4 p-2 bg-primary-500 rounded flex-none disabled:bg-background-100 disabled:!border-background-300 disabled:border"
           disabled={poi.location.lat === 0 && poi.location.lng === 0}
           onClick={() => setSecondStep(true)}
           style={{ display: secondStep ? 'none' : 'block' }}

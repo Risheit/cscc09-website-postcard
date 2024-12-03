@@ -1,7 +1,7 @@
-import { User } from "@/backend/users";
-import { faPen, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { KeyboardEvent, useEffect, useState } from "react";
+import { User } from '@/backend/users';
+import { faCheck, faPen, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { KeyboardEvent, useEffect, useState } from 'react';
 
 export default function DisplayName(props: {
   user?: User;
@@ -18,11 +18,11 @@ export default function DisplayName(props: {
   const [editName, setEditName] = useState(user?.displayName);
 
   function handleKeyDown(ev: KeyboardEvent<HTMLInputElement>): void {
-    if (!editName || editName.trim() === "") {
+    if (!editName || editName.trim() === '') {
       return;
     }
 
-    if (ev.key === "Enter") {
+    if (ev.key === 'Enter') {
       setIsEditing(false);
       if (onEdit) {
         onEdit({ displayName: editName });
@@ -42,7 +42,7 @@ export default function DisplayName(props: {
     <div>
       {!isEditing && (
         <div
-          className="flex h-fit items-center transition-all"
+          className="flex h-fit items-center transition-all p-2"
           onMouseEnter={() => setIsDisplayNameHovered(true)}
           onMouseLeave={() => setIsDisplayNameHovered(false)}
           onClick={isEditable ? () => setIsEditing(true) : undefined}
@@ -58,20 +58,38 @@ export default function DisplayName(props: {
       )}
       {isEditing && (
         <span className="flex items-center gap-4">
-          <FontAwesomeIcon
-            icon={faXmark}
-            className="h-7 opacity-50 hover:opacity-100"
-            onClick={() => setIsEditing(false)}
-          />
           <input
             type="text"
-            className="text-3xl p-2 bg-background-50 border border-text-500 rounded"
+            className="text-4xl p-2 bg-background-50 rounded w-full max-w-[500px]"
             defaultValue={editName}
             name="username"
             onKeyDown={handleKeyDown}
             onChange={(ev) => setEditName(ev.target.value)}
             autoFocus
             required
+            maxLength={20}
+          />
+
+          <FontAwesomeIcon
+            icon={faCheck}
+            className="h-7 opacity-50 hover:opacity-100"
+            onClick={() => {
+              if (!editName || editName.trim() === '') {
+                return;
+              }
+
+              setIsEditing(false);
+              if (onEdit) {
+                onEdit({ displayName: editName });
+                setDisplayNameContent(editName);
+              }
+            }}
+          />
+
+          <FontAwesomeIcon
+            icon={faXmark}
+            className="h-7 opacity-50 hover:opacity-100"
+            onClick={() => setIsEditing(false)}
           />
         </span>
       )}

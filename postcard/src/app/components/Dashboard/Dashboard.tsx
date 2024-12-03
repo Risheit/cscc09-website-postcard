@@ -149,7 +149,10 @@ export default function Dashboard(props: {
                 <img
                   src={post.poster_profile_pic}
                   alt="profile"
-                  className="rounded-full w-6 select-none"
+                  className="rounded-full w-6 h-6 select-none object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/static/default_profile.jpg';
+                  }}
                 />
               ) : (
                 <span className="rounded-full h-6 w-6 bg-primary-600"></span>
@@ -319,7 +322,7 @@ export default function Dashboard(props: {
           <img
             src="/static/loading.svg"
             alt="loading..."
-            className="w-11 h-11 mt-2 opacity-50"
+            className="w-11 h-11 mt-2 opacity-50 select-none"
           />
         </div>
       )}

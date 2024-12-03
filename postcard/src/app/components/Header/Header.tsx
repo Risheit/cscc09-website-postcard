@@ -27,7 +27,7 @@ export default function Header() {
   });
 
   return (
-    <header className="h-12 flex relative place-items-center justify-between border-b border-background-300 shadow-md shadow-background-100 p-2">
+    <header className="h-12 flex relative place-items-center justify-between border-b !border-background-300 shadow-md shadow-background-100 p-2">
       {/* click route to /dashboard or / */}
       <Link href="/" className="h-full flex place-items-center">
         <span className="aspect-square h-full flex items-center justify-center rounded-full bg-primary-500 ml-2">
@@ -60,13 +60,13 @@ export default function Header() {
           <button
             className="bg-primary-300 px-4"
             onClick={() => {
-              router.push('/account/create?return=/');
+              router.push('/account/create?redirect=/');
             }}
           >
             sign up
           </button>
           <button
-            className="bg-secondary-100 px-4 border-background-300"
+            className="bg-secondary-100 px-4 !border-background-300"
             onClick={() => {
               router.push('/api/auth/signin');
             }}
@@ -85,10 +85,17 @@ export default function Header() {
                 <img
                   src={session.data?.dbUser?.profilePicturePath}
                   alt="profile"
-                  className="rounded-full w-6"
+                  className="rounded-full w-6 h-6 select-none object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/static/default_profile.jpg';
+                  }}
                 />
               ) : (
-                <span className="rounded-full h-6 w-6 bg-text-900"></span>
+                <img
+                  src="/static/default_profile.jpg"
+                  alt="profile"
+                  className="rounded-full w-6 h-6 select-none object-cover"
+                />
               )}
             </span>
             <span className="pl-2">
@@ -96,7 +103,7 @@ export default function Header() {
             </span>
           </Link>
           <button
-            className="bg-secondary-100 px-4 border-background-300"
+            className="bg-secondary-100 px-4 !border-background-300"
             onClick={() => {
               router.push('/api/auth/signout');
             }}

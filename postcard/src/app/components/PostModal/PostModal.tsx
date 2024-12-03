@@ -157,7 +157,10 @@ export default function PostModal(props: {
                 <img
                   src={selectedPost.poster_profile_pic}
                   alt="profile"
-                  className="rounded-full w-6 select-none"
+                  className="rounded-full w-6 h-6 select-none object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/static/default_profile.jpg';
+                  }}
                 />
               ) : (
                 <span className="rounded-full h-6 w-6 bg-primary-600"></span>
@@ -306,7 +309,7 @@ export default function PostModal(props: {
             })}
           </span>
 
-          <hr className="border-t border-gray-300 mx-auto w-1/2" />
+          <hr className="border-t !border-gray-300 mx-auto w-1/2" />
 
           <h1 className="mb-2">comments</h1>
           <div className="flex flex-col gap-2 overflow-y-auto max-h-[50vh] h-full no-scrollbar">

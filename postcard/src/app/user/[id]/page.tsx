@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import AboutMe from '@/app/components/Account/AboutMe/AboutMe';
 import DisplayName from '@/app/components/Account/DisplayName/DisplayName';
@@ -16,7 +16,7 @@ export default function Page({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (session.data?.dbUser?.id === params.id) {
-      router.push("/account");
+      router.push('/account');
     }
 
     fetch(`/api/users/${params.id}`)
@@ -27,8 +27,9 @@ export default function Page({ params }: { params: { id: string } }) {
       })
       .catch((err) => {
         console.log(err);
+        router.push('/404');
       });
-  }, [session, params.id, router]);
+  }, [session.data?.dbUser?.id, params.id]);
 
   return (
     <div className="flex flex-auto">
@@ -47,7 +48,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <img
             src="/static/loading.svg"
             alt="loading..."
-            className="w-20 h-20 mt-20 opacity-50"
+            className="w-20 h-20 mt-20 opacity-50 select-none"
           />
         </div>
       )}

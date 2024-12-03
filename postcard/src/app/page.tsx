@@ -1,7 +1,7 @@
 'use client';
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const router = useRouter();
@@ -22,11 +22,13 @@ export default function Page() {
             /dashboard
           </Link>
         </p>
-        <button className="mt-6 px-4 py-2 bg-primary-500 text-background-900 rounded hover:bg-primary-400"
+        <button
+          className="mt-6 px-4 py-2 bg-primary-500 text-background-900 rounded hover:bg-primary-400"
           onClick={(ev) => {
             ev.preventDefault();
-            router.push('/account/create?return=/');
-          }}>
+            router.push('/account/create?redirect=/dashboard');
+          }}
+        >
           Get Started
         </button>
       </div>

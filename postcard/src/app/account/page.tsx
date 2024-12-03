@@ -1,28 +1,29 @@
-"use client";
+'use client';
 
-import useDbSession from "@/app/hooks/useDbSession";
+import useDbSession from '@/app/hooks/useDbSession';
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import DisplayName from "../components/Account/DisplayName/DisplayName";
-import AboutMe from "../components/Account/AboutMe/AboutMe";
-import ProfilePicture from "../components/Account/ProfilePicture/ProfilePicture";
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import DisplayName from '../components/Account/DisplayName/DisplayName';
+import AboutMe from '../components/Account/AboutMe/AboutMe';
+import ProfilePicture from '../components/Account/ProfilePicture/ProfilePicture';
 
 export default function Page() {
   const session = useDbSession();
-  const user = session.data?.dbUser;
+  const [user, setUser] = useState(session.data?.dbUser);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("session", session);
-    if (!session || session.status === "unauthenticated") {
-      router.push("/api/auth/signin");
+    console.log('session', session);
+    if (!session || session.status === 'unauthenticated') {
+      router.push('/api/auth/signin');
     }
-    if (session?.status === "authenticated") {
+    if (session?.status === 'authenticated') {
       setIsLoading(false);
     }
-  }, [session, router]);
+    setUser(session.data?.dbUser);
+  }, [session.data?.dbUser, router]);
 
   const handleAccountEdit = (data: {
     displayName?: string;
@@ -31,27 +32,41 @@ export default function Page() {
   }) => {
     const formData = new FormData();
     if (data.displayName) {
-      formData.append("displayName", data.displayName);
+      formData.append('displayName', data.displayName);
     }
     if (data.aboutMe) {
-      formData.append("aboutMe", data.aboutMe);
+      formData.append('aboutMe', data.aboutMe);
     }
     if (data.profilePicture) {
       formData.append(
-        "profilePic",
+        'profilePic',
         data.profilePicture,
-        `${user?.id ?? ""}_data.profilePicture.name)`
+        `${user?.id ?? ''}_data.profilePicture.name)`
       );
     }
 
-    fetch(`/api/users/${user?.id}`, {
-      method: "PATCH",
-      body: formData,
-    });
+    setIsLoading(true);
 
-    if (data.profilePicture) {
-      router.refresh();
-    }
+    fetch(`/api/users/${user?.id}`, {
+      method: 'PATCH',
+      body: formData,
+    })
+      .then(async (res) => {
+        const u = await res.json();
+        console.log('updated user', u);
+        const updatedUser = {
+          aboutMe: u.about_me,
+          displayName: u.display_name,
+          id: u.id,
+          profilePicturePath: `/api/images/${u.profile_pic}`,
+          externalProfilePic: u.external_profile_pic,
+        };
+        setUser(updatedUser);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -71,7 +86,7 @@ export default function Page() {
           <img
             src="/static/loading.svg"
             alt="loading..."
-            className="w-20 h-20 mt-20 opacity-50"
+            className="w-20 h-20 mt-20 opacity-50 select-none"
           />
         </div>
       )}

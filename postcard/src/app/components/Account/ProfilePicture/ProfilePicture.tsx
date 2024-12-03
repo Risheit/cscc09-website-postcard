@@ -47,6 +47,9 @@ export default function ProfilePicture(props: {
         }`}
         onMouseEnter={() => setIsProfileHovered(true)}
         onMouseLeave={() => setIsProfileHovered(false)}
+        onError={(e) => {
+          e.currentTarget.src = '/static/default_profile.jpg';
+        }}
       />
       {isEditable && isProfileHovered && (
         <FontAwesomeIcon
