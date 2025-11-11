@@ -1,7 +1,12 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/DnqlZtdt)
+# Postcard
 
+> [!NOTE]
+> This live site is now defunct, but was originally deployed on postcardsocial.me.
 
-# postcard
+A Next.js project deployed on Google Cloud Platform, 
+Postcard is a social media site based off the Google Maps API. 
+Drop pins on the map and make text or image posts, or  start up live drawing sessions 
+alongside other users.
 
 ## Team Members
 - Gigi Cheang
